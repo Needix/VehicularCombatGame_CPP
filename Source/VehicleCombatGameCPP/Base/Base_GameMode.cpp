@@ -17,11 +17,20 @@ void ABase_GameMode::BeginPlay() {
 }
 
 void ABase_GameMode::FindLevelBoundaries() { 
+	if(LevelBoundary1 != FVector(0, 0, 0) && LevelBoundary2 != FVector(0, 0, 0)) {
+		return;
+	}
 	TArray<AActor*> levelBoundaries;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ALevelBoundary::StaticClass(), levelBoundaries);
-	for(int i = 0; i < levelBoundaries.Num(); i++) {
-		ALevelBoundary* levelBoundary = (ALevelBoundary*)levelBoundaries[i];
+	if(levelBoundaries.Num() != 2) {
+		return;
 	}
+	LevelBoundary1 = levelBoundaries[0]->GetActorLocation();
+	LevelBoundary2 = levelBoundaries[1]->GetActorLocation();
+	/*for(int i = 0; i < levelBoundaries.Num(); i++) {
+		ALevelBoundary* levelBoundary = (ALevelBoundary*)levelBoundaries[i];
+		levelBoundary->GetActorLocation();
+	}*/
 }
 
 void ABase_GameMode::CreateTeams() {}

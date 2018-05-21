@@ -16,8 +16,8 @@ class VEHICLECOMBATGAMECPP_API ABase_GameMode : public AGameMode
 	GENERATED_BODY()
 
 	private:
-		FVector LevelBoundary1;
-		FVector LevelBoundary2;
+		FVector LevelBoundary1 = FVector(0, 0, 0);
+		FVector LevelBoundary2 = FVector(0, 0, 0);
 
 	public:
 		const int CONST_DeathRespawnTime = 3;
