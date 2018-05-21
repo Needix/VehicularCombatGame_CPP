@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameMode.h"
 #include "Base_GameMode.generated.h"
+#include "GameModes/Team.h"
 
 /**
  * 
@@ -13,8 +14,23 @@ UCLASS()
 class VEHICLECOMBATGAMECPP_API ABase_GameMode : public AGameMode
 {
 	GENERATED_BODY()
+
+	private:
+		FVector LevelBoundary1;
+		FVector LevelBoundary2;
+
+	public:
+		const int CONST_DeathRespawnTime = 3;
+		int MaxTeams = 4;
+		int MaxCarsPerTeam = 2;
+		TArray<ATeam> teams;
 	
+	private:
+		void FindLevelBoundaries();
+		void CreateTeams();
+		void SpawnPlayer();
+		void SpawnAIs();
 	
-	
-	
+	public:
+		void BeginPlay() override;
 };
