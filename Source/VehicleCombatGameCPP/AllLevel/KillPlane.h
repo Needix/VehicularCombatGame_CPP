@@ -4,12 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Components/StaticMeshComponent.h"
+#include "ConstructorHelpers.h"
 #include "KillPlane.generated.h"
 
 UCLASS()
 class VEHICLECOMBATGAMECPP_API AKillPlane : public AActor
 {
 	GENERATED_BODY()
+
+	/*UPROPERTY(EditDefaultsOnly, Category = "Static Mesh") 
+	UStaticMeshComponent* ourMesh;*/
 	
 public:	
 	// Sets default values for this actor's properties
@@ -23,6 +28,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	
+private:
+	void InitCustomComponents();
 	
 };

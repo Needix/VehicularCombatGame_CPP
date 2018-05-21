@@ -32,7 +32,8 @@ void AAI_DrivePawn::SetSteering(APlayer_DrivePawn* closestPlayer) {
 	FRotator rotator = UKismetMathLibrary::FindLookAtRotation(myLocation, closestPlayerLocation);
 	FRotator myRotator = this->GetActorRotation();
 	FRotator baseRotator = UKismetMathLibrary::NormalizedDeltaRotator(rotator, myRotator);
-	float steering = UKismetMathLibrary::MapRangeClamped(baseRotator.Vector.Yaw, -100, 100, -1, 1);
+	float yaw = baseRotator.Yaw;
+	float steering = UKismetMathLibrary::MapRangeClamped(yaw, -100, 100, -1, 1);
 
 	UWheeledVehicleMovementComponent4W* Vehicle4W = CastChecked<UWheeledVehicleMovementComponent4W>(GetVehicleMovement());
 	Vehicle4W->SetSteeringInput(steering);
