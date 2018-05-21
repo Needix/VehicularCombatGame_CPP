@@ -32,5 +32,6 @@ class VEHICLECOMBATGAMECPP_API ABase_GameMode : public AGameMode
 		void SpawnAIs();
 	
 	public:
+		ABase_GameMode();
 		void BeginPlay() override;
 };
