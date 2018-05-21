@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameMode.h"
-#include "Base_GameMode.generated.h"
 #include "GameModes/Team.h"
+#include "Base_GameMode.generated.h"
 
 /**
  * 
