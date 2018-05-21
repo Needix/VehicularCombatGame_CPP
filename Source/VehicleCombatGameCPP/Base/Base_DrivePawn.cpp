@@ -17,6 +17,7 @@
 #include "Engine/Engine.h"
 #include "GameFramework/Controller.h"
 #include "UObject/ConstructorHelpers.h"
+#include "Runtime/Engine/Classes/Particles/ParticleSystemComponent.h"
 
 // Needed for VR Headset
 #if HMD_MODULE_INCLUDED
@@ -159,6 +160,24 @@ ABase_DrivePawn::ABase_DrivePawn()
 	InCarGear->SetRelativeLocation(FVector(35.0f, 5.0f, 20.0f));
 	InCarGear->SetRelativeRotation(FRotator(0.0f, 180.0f, 0.0f));
 	InCarGear->SetupAttachment(GetMesh());
+
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> SmokeParticleSystem(TEXT("ParticleSystem'/Game/StarterContent/Particles/P_Smoke.P_Smoke'"));
+	HealthSmoke = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("HealthSmoke"));
+	HealthSmoke->SetTemplate(SmokeParticleSystem.Object);
+	HealthSmoke->bAutoActivate = false;
+	HealthSmoke->SetupAttachment(GetMesh());
+
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> FireParticleSystem(TEXT("ParticleSystem'/Game/StarterContent/Particles/P_Fire.P_Fire'"));
+	HealthFire = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("HealthFire"));
+	HealthFire->SetTemplate(FireParticleSystem.Object);
+	HealthFire->bAutoActivate = false;
+	HealthFire->SetupAttachment(GetMesh());
+
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> ExplosionParticleSystem(TEXT("ParticleSystem'/Game/StarterContent/Particles/P_Explosion.P_Explosion'"));
+	HealthExplosion = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("HealthExplosion"));
+	HealthExplosion->SetTemplate(FireParticleSystem.Object);
+	HealthExplosion->bAutoActivate = false;
+	HealthExplosion->SetupAttachment(GetMesh());
 	
 	// Setup the audio component and allocate it a sound cue
 	static ConstructorHelpers::FObjectFinder<USoundCue> SoundCue(TEXT("/Game/VehicleAdv/Sound/Engine_Loop_Cue.Engine_Loop_Cue"));
@@ -246,8 +265,12 @@ void ABase_DrivePawn::Tick(float Delta)
 {
 	Super::Tick(Delta);
 
+	CurrentDeltaSeconds = Delta;
+
 	// Setup the flag to say we are in reverse gear
 	bInReverseGear = GetVehicleMovement()->GetCurrentGear() < 0;
+
+	UpdateHealth();
 	
 	// Update phsyics material
 	UpdatePhysicsMaterial();
@@ -369,6 +392,37 @@ void ABase_DrivePawn::UpdatePhysicsMaterial()
 			bIsLowFriction = true;
 		}
 	}
+}
+
+void ABase_DrivePawn::DecreaseHealthByTime(float deltaSecondsMultiplicator) {
+	DecreaseHealthByFloat(CurrentDeltaSeconds * deltaSecondsMultiplicator);
+}
+
+void ABase_DrivePawn::DecreaseHealthByFloat(float health) {
+	Health =- health;
+
+	if (Health <= 0) {
+		Health = 0;
+	}
+}
+
+void ABase_DrivePawn::UpdateHealth() {
+	if (IsCollidingWithKillPlane) {
+		DecreaseHealthByTime(10);
+	}
+
+	if (Health <= 0) {
+		HealthExplosion->ActivateSystem();
+		DestroyCar();
+	} else if (Health <= 10) {
+		HealthFire->ActivateSystem();
+	} else if (Health <= 30) {
+		HealthSmoke->ActivateSystem();
+	}
+}
+
+void ABase_DrivePawn::DestroyCar() {
+	Destroy();
 }
 
 #undef LOCTEXT_NAMESPACE

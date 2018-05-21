@@ -46,6 +46,15 @@ class ABase_DrivePawn : public AWheeledVehicle
 	UPROPERTY(Category = Display, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UAudioComponent* EngineSoundComponent;
 
+	UPROPERTY(VisibleAnywhere)
+	class UParticleSystemComponent* HealthSmoke;
+
+	UPROPERTY(VisibleAnywhere)
+	class UParticleSystemComponent* HealthFire;
+
+	UPROPERTY(VisibleAnywhere)
+	class UParticleSystemComponent* HealthExplosion;
+
 public:
 	ABase_DrivePawn();
 
@@ -97,6 +106,14 @@ public:
 	/** Update the physics material used by the vehicle mesh */
 	void UpdatePhysicsMaterial();
 
+	void DecreaseHealthByTime(float deltaSecondsMultiplicator);
+
+	void DecreaseHealthByFloat(float health);
+
+	void UpdateHealth();
+
+	void DestroyCar();
+
 	/** Handle pressing right */
 	void MoveRight(float Val);
 	/** Handle handbrake pressed */
@@ -129,6 +146,10 @@ private:
 	UPhysicalMaterial* SlipperyMaterial;
 	/** Non Slippery Material instance */
 	UPhysicalMaterial* NonSlipperyMaterial;
+
+	float Health = 100;
+	float CurrentDeltaSeconds;
+	bool IsCollidingWithKillPlane;
 
 
 public:
