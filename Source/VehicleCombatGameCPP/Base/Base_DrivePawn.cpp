@@ -161,6 +161,12 @@ ABase_DrivePawn::ABase_DrivePawn()
 	InCarGear->SetRelativeRotation(FRotator(0.0f, 180.0f, 0.0f));
 	InCarGear->SetupAttachment(GetMesh());
 
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> ExhaustParticleSystem(TEXT("ParticleSystem'/Game/VehicularCombatGame/ParticleEffects/Fire.Fire'"));
+	ExhaustParticles = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("ExhaustParticles"));
+	ExhaustParticles->SetRelativeLocation(FVector(-78.8f, -5.8f, 26.6f));
+	ExhaustParticles->SetTemplate(ExhaustParticleSystem.Object);
+	ExhaustParticles->SetupAttachment(GetMesh());
+
 	static ConstructorHelpers::FObjectFinder<UParticleSystem> SmokeParticleSystem(TEXT("ParticleSystem'/Game/StarterContent/Particles/P_Smoke.P_Smoke'"));
 	HealthSmoke = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("HealthSmoke"));
 	HealthSmoke->SetTemplate(SmokeParticleSystem.Object);

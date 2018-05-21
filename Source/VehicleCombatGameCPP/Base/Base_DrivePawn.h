@@ -47,6 +47,9 @@ class ABase_DrivePawn : public AWheeledVehicle
 	UAudioComponent* EngineSoundComponent;
 
 	UPROPERTY(VisibleAnywhere)
+	class UParticleSystemComponent* ExhaustParticles;
+
+	UPROPERTY(VisibleAnywhere)
 	class UParticleSystemComponent* HealthSmoke;
 
 	UPROPERTY(VisibleAnywhere)
