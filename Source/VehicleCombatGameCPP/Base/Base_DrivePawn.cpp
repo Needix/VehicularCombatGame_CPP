@@ -101,6 +101,8 @@ ABase_DrivePawn::ABase_DrivePawn()
 	Vehicle4W->TransmissionSetup.GearSwitchTime = 0.15f;
 	Vehicle4W->TransmissionSetup.GearAutoBoxLatency = 1.0f;
 
+	Vehicle4W->bDeprecatedSpringOffsetMode = true;// TODO
+
 	// Physics settings
 	// Adjust the center of mass - the buggy is quite low
 	UPrimitiveComponent* UpdatedPrimitive = Cast<UPrimitiveComponent>(Vehicle4W->UpdatedComponent);
