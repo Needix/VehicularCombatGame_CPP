@@ -4,6 +4,10 @@
 # Visual Studio 2015 database file
 *.VC.db
 
+# Visual Studio Code user specific files
+.vscode/
+*.code-workspace
+
 # CLion user specific files
 .idea
 
