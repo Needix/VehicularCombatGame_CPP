@@ -93,8 +93,6 @@ void ABase_GameMode::SpawnPlayer(ATeam* team) {
 
 	APlayer_Controller* playerController = CastChecked<APlayer_Controller>(pc);
 	playerController->Team = team;
-	team->TeamPlayer.Add(playerController);
-	playerController->Possess(spawnedCar);
 }
 
 void ABase_GameMode::SpawnAIs() {
@@ -102,8 +100,10 @@ void ABase_GameMode::SpawnAIs() {
 		TArray<AController*> controllerArray = team->TeamPlayer;
 		for(int i = controllerArray.Num() ; i < MaxCarsPerTeam; i++) {
 			ABase_DrivePawn* spawnedCar = team->SpawnCar(NULL, AAI_DrivePawn::StaticClass());
-			spawnedCar->SpawnDefaultController();
-			team->TeamPlayer.Add(spawnedCar->GetController());
 		}
 	}
+}
+
+float ABase_GameMode::GetRespawnTime() {
+	return CONST_DeathRespawnTime;
 }

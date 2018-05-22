@@ -18,6 +18,7 @@ private:
 	float AI_RespawnTimer;
 
 public:
+	UPROPERTY()
 	TArray<AController*> TeamPlayer;
 	
 // Functions
@@ -26,7 +27,7 @@ public:
 	ATeam();
 
 private:
-	void InitCustomComponents();
+	void HandleAIRespawn(float DeltaTime);
 
 protected:
 	// Called when the game starts or when spawned
@@ -37,5 +38,6 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	ABase_DrivePawn* SpawnCar(AController* controller, UClass* driveClass);
+	ABase_DrivePawn* SpawnCar(AController* controller, UClass* driveClass, int controllerIndex);
 	
 };

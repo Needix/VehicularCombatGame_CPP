@@ -15,6 +15,7 @@ class VEHICLECOMBATGAMECPP_API ABase_GameMode : public AGameMode
 {
 	GENERATED_BODY()
 
+	// Variables
 	private:
 		FVector LevelBoundary1 = FVector(0, 0, 0);
 		FVector LevelBoundary2 = FVector(0, 0, 0);
@@ -26,6 +27,7 @@ class VEHICLECOMBATGAMECPP_API ABase_GameMode : public AGameMode
 		int MaxCarsPerTeam = 2;
 		TArray<ATeam*> Teams;
 	
+	// Functions
 	private:
 		void FindLevelBoundaries();
 		void CreateTeams();
@@ -36,4 +38,6 @@ class VEHICLECOMBATGAMECPP_API ABase_GameMode : public AGameMode
 		ABase_GameMode();
 		void Tick(float Delta) override;
 		void BeginPlay() override;
+
+		float GetRespawnTime();
 };
