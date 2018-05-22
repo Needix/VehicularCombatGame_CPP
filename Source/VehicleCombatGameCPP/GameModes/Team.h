@@ -4,16 +4,29 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Base/Base_DrivePawn.h"
+//#include "Controller.h"
 #include "Team.generated.h"
 
 UCLASS()
-class VEHICLECOMBATGAMECPP_API ATeam : public AActor
-{
+class VEHICLECOMBATGAMECPP_API ATeam : public AActor {
 	GENERATED_BODY()
+	 
+// Variables
+private:
+	float DeltaSeconds;
+	float AI_RespawnTimer;
+
+public:
+	TArray<AController*> TeamPlayer;
 	
+// Functions
 public:	
 	// Sets default values for this actor's properties
 	ATeam();
+
+private:
+	void InitCustomComponents();
 
 protected:
 	// Called when the game starts or when spawned
@@ -23,6 +36,6 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	
+	ABase_DrivePawn* SpawnCar(AController* controller, UClass* driveClass);
 	
 };

@@ -4,17 +4,18 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "GameModes/Team.h"
 #include "Player_Controller.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class VEHICLECOMBATGAMECPP_API APlayer_Controller : public APlayerController
-{
+class VEHICLECOMBATGAMECPP_API APlayer_Controller : public APlayerController {
 	GENERATED_BODY()
 	
-	
+	public:
+		ATeam* Team;
 	
 	
 };

@@ -10,6 +10,13 @@ public class VehicleCombatGameCPP : ModuleRules
 
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "PhysXVehicles", "HeadMountedDisplay" });
 
-		PublicDefinitions.Add("HMD_MODULE_INCLUDED=1");
+        PublicDependencyModuleNames.AddRange(new string[] {
+             "OnlineSubsystem",
+             "OnlineSubsystemUtils",
+             "Landscape",
+             "Steamworks"
+         });
+
+        PublicDefinitions.Add("HMD_MODULE_INCLUDED=1");
 	}
 }

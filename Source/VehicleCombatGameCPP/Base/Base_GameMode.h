@@ -18,20 +18,22 @@ class VEHICLECOMBATGAMECPP_API ABase_GameMode : public AGameMode
 	private:
 		FVector LevelBoundary1 = FVector(0, 0, 0);
 		FVector LevelBoundary2 = FVector(0, 0, 0);
+		bool LevelBoundarySet = false;
 
 	public:
 		const int CONST_DeathRespawnTime = 3;
 		int MaxTeams = 4;
 		int MaxCarsPerTeam = 2;
-		TArray<ATeam> teams;
+		TArray<ATeam*> Teams;
 	
 	private:
 		void FindLevelBoundaries();
 		void CreateTeams();
-		void SpawnPlayer();
+		void SpawnPlayer(ATeam* team);
 		void SpawnAIs();
 	
 	public:
 		ABase_GameMode();
+		void Tick(float Delta) override;
 		void BeginPlay() override;
 };
