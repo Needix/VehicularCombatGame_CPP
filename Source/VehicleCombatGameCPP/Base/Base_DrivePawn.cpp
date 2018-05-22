@@ -405,7 +405,7 @@ void ABase_DrivePawn::DecreaseHealthByTime(float deltaSecondsMultiplicator) {
 }
 
 void ABase_DrivePawn::DecreaseHealthByFloat(float health) {
-	Health =- health;
+	Health -= health;
 
 	if (Health <= 0) {
 		Health = 0;
