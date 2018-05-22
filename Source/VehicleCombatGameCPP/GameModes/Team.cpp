@@ -18,8 +18,7 @@ ATeam::ATeam()
 }
 
 void ATeam::InitCustomComponents() {
-	USceneComponent* rootSceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootSceneComponent"));
-    RootComponent = rootSceneComponent;
+	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneComponent"));
 }
 
 // Called when the game starts or when spawned
