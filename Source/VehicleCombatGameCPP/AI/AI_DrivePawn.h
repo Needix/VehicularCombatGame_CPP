@@ -7,19 +7,17 @@
 #include "AI_DrivePawn.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
-class VEHICLECOMBATGAMECPP_API AAI_DrivePawn : public ABase_DrivePawn
-{
+class VEHICLECOMBATGAMECPP_API AAI_DrivePawn : public ABase_DrivePawn {
 	GENERATED_BODY()
-	
-	
-	public:
-		virtual void Tick(float Delta) override;
 
-	private:
-		class APlayer_DrivePawn* FindClosestPlayer();
-		void SetSteering(APlayer_DrivePawn* closestPlayer);
-		void SetThrottle(APlayer_DrivePawn* closestPlayer);
+  public:
+	virtual void Tick(float Delta) override;
+
+  private:
+	class APlayer_DrivePawn *FindClosestPlayer();
+	void SetSteering(APlayer_DrivePawn *closestPlayer);
+	void SetThrottle(APlayer_DrivePawn *closestPlayer);
 };

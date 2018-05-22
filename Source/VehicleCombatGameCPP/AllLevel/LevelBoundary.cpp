@@ -3,27 +3,20 @@
 #include "LevelBoundary.h"
 #include "Engine/Engine.h"
 
-
 // Sets default values
-ALevelBoundary::ALevelBoundary()
-{
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+ALevelBoundary::ALevelBoundary() {
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneComponent"));
 }
 
 // Called when the game starts or when spawned
-void ALevelBoundary::BeginPlay()
-{
+void ALevelBoundary::BeginPlay() {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
-void ALevelBoundary::Tick(float DeltaTime)
-{
+void ALevelBoundary::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
-
 }
-

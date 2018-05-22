@@ -11,33 +11,32 @@
 UCLASS()
 class VEHICLECOMBATGAMECPP_API ATeam : public AActor {
 	GENERATED_BODY()
-	 
-// Variables
-private:
+
+	// Variables
+  private:
 	float DeltaSeconds;
 	float AI_RespawnTimer;
 
-public:
+  public:
 	UPROPERTY()
-	TArray<AController*> TeamPlayer;
-	
-// Functions
-public:	
+	TArray<AController *> TeamPlayer;
+
+	// Functions
+  public:
 	// Sets default values for this actor's properties
 	ATeam();
 
-private:
+  private:
 	void HandleAIRespawn(float DeltaTime);
 
-protected:
+  protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+  public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	ABase_DrivePawn* SpawnCar(AController* controller, UClass* driveClass);
-	ABase_DrivePawn* SpawnCar(AController* controller, UClass* driveClass, int controllerIndex);
-	
+	ABase_DrivePawn *SpawnCar(AController *controller, UClass *driveClass);
+	ABase_DrivePawn *SpawnCar(AController *controller, UClass *driveClass, int controllerIndex);
 };

@@ -7,14 +7,9 @@
 #include "AI_Controller.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
-class VEHICLECOMBATGAMECPP_API AAI_Controller : public AAIController
-{
+class VEHICLECOMBATGAMECPP_API AAI_Controller : public AAIController {
 	GENERATED_BODY()
-	
-	
-	
-	
 };

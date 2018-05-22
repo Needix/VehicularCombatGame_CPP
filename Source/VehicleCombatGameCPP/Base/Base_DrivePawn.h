@@ -13,52 +13,51 @@ class UTextRenderComponent;
 class UInputComponent;
 class UAudioComponent;
 
-UCLASS(config=Game)
-class ABase_DrivePawn : public AWheeledVehicle
-{
+UCLASS(config = Game)
+class ABase_DrivePawn : public AWheeledVehicle {
 	GENERATED_BODY()
 
 	/** Spring arm that will offset the camera */
 	UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	USpringArmComponent* SpringArm;
+	USpringArmComponent *SpringArm;
 
 	/** Camera component that will be our viewpoint */
 	UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	UCameraComponent* Camera;
+	UCameraComponent *Camera;
 
 	/** SCene component for the In-Car view origin */
 	UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	class USceneComponent* InternalCameraBase;
+	class USceneComponent *InternalCameraBase;
 
 	/** Camera component for the In-Car view */
 	UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	UCameraComponent* InternalCamera;
+	UCameraComponent *InternalCamera;
 
 	/** Text component for the In-Car speed */
 	UPROPERTY(Category = Display, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	UTextRenderComponent* InCarSpeed;
+	UTextRenderComponent *InCarSpeed;
 
 	/** Text component for the In-Car gear */
 	UPROPERTY(Category = Display, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	UTextRenderComponent* InCarGear;
+	UTextRenderComponent *InCarGear;
 
 	/** Audio component for the engine sound */
 	UPROPERTY(Category = Display, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	UAudioComponent* EngineSoundComponent;
+	UAudioComponent *EngineSoundComponent;
 
 	UPROPERTY(VisibleAnywhere)
-	class UParticleSystemComponent* ExhaustParticles;
+	class UParticleSystemComponent *ExhaustParticles;
 
 	UPROPERTY(VisibleAnywhere)
-	class UParticleSystemComponent* HealthSmoke;
+	class UParticleSystemComponent *HealthSmoke;
 
 	UPROPERTY(VisibleAnywhere)
-	class UParticleSystemComponent* HealthFire;
+	class UParticleSystemComponent *HealthFire;
 
 	UPROPERTY(VisibleAnywhere)
-	class UParticleSystemComponent* HealthExplosion;
+	class UParticleSystemComponent *HealthExplosion;
 
-public:
+  public:
 	ABase_DrivePawn();
 
 	/** The current speed as a string eg 10 km/h */
@@ -71,11 +70,11 @@ public:
 
 	UPROPERTY(Category = Display, VisibleDefaultsOnly, BlueprintReadOnly)
 	/** The color of the incar gear text in forward gears */
-	FColor	GearDisplayColor;
+	FColor GearDisplayColor;
 
 	/** The color of the incar gear text when in reverse */
 	UPROPERTY(Category = Display, VisibleDefaultsOnly, BlueprintReadOnly)
-	FColor	GearDisplayReverseColor;
+	FColor GearDisplayReverseColor;
 
 	/** Are we using incar camera */
 	UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadOnly)
@@ -89,15 +88,16 @@ public:
 	FVector InternalCameraOrigin;
 
 	// Begin Pawn interface
-	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
+	virtual void SetupPlayerInputComponent(UInputComponent *InputComponent) override;
 	// End Pawn interface
 
 	// Begin Actor interface
 	virtual void Tick(float Delta) override;
-protected:
+
+  protected:
 	virtual void BeginPlay() override;
 
-public:
+  public:
 	// End Actor interface
 
 	/** Handle pressing forwards */
@@ -132,13 +132,13 @@ public:
 	static const FName LookRightBinding;
 	static const FName EngineAudioRPM;
 
-private:
-	/** 
+  private:
+	/**
 	 * Activate In-Car camera. Enable camera and sets visibility of incar hud display
 	 *
 	 * @param	bState true will enable in car view and set visibility of various
 	 */
-	void EnableIncarView( const bool bState );
+	void EnableIncarView(const bool bState);
 
 	/** Update the gear and speed strings */
 	void UpdateHUDStrings();
@@ -146,26 +146,37 @@ private:
 	/* Are we on a 'slippery' surface */
 	bool bIsLowFriction;
 	/** Slippery Material instance */
-	UPhysicalMaterial* SlipperyMaterial;
+	UPhysicalMaterial *SlipperyMaterial;
 	/** Non Slippery Material instance */
-	UPhysicalMaterial* NonSlipperyMaterial;
+	UPhysicalMaterial *NonSlipperyMaterial;
 
 	float Health = 100;
 	float CurrentDeltaSeconds;
 	bool IsCollidingWithKillPlane;
 
-
-public:
+  public:
 	/** Returns SpringArm subobject **/
-	FORCEINLINE USpringArmComponent* GetSpringArm() const { return SpringArm; }
+	FORCEINLINE USpringArmComponent *GetSpringArm() const {
+		return SpringArm;
+	}
 	/** Returns Camera subobject **/
-	FORCEINLINE UCameraComponent* GetCamera() const { return Camera; }
+	FORCEINLINE UCameraComponent *GetCamera() const {
+		return Camera;
+	}
 	/** Returns InternalCamera subobject **/
-	FORCEINLINE UCameraComponent* GetInternalCamera() const { return InternalCamera; }
+	FORCEINLINE UCameraComponent *GetInternalCamera() const {
+		return InternalCamera;
+	}
 	/** Returns InCarSpeed subobject **/
-	FORCEINLINE UTextRenderComponent* GetInCarSpeed() const { return InCarSpeed; }
+	FORCEINLINE UTextRenderComponent *GetInCarSpeed() const {
+		return InCarSpeed;
+	}
 	/** Returns InCarGear subobject **/
-	FORCEINLINE UTextRenderComponent* GetInCarGear() const { return InCarGear; }
+	FORCEINLINE UTextRenderComponent *GetInCarGear() const {
+		return InCarGear;
+	}
 	/** Returns EngineSoundComponent subobject **/
-	FORCEINLINE UAudioComponent* GetEngineSoundComponent() const { return EngineSoundComponent; }
+	FORCEINLINE UAudioComponent *GetEngineSoundComponent() const {
+		return EngineSoundComponent;
+	}
 };

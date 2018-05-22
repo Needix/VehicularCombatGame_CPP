@@ -31,12 +31,11 @@ const FName ABase_DrivePawn::EngineAudioRPM("RPM");
 
 #define LOCTEXT_NAMESPACE "VehiclePawn"
 
-ABase_DrivePawn::ABase_DrivePawn()
-{
+ABase_DrivePawn::ABase_DrivePawn() {
 	// Car mesh
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CarMesh(TEXT("/Game/VehicleAdv/Vehicle/Vehicle_SkelMesh.Vehicle_SkelMesh"));
 	GetMesh()->SetSkeletalMesh(CarMesh.Object);
-	
+
 	static ConstructorHelpers::FClassFinder<UObject> AnimBPClass(TEXT("/Game/VehicleAdv/Vehicle/VehicleAnimationBlueprint"));
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 	GetMesh()->SetAnimInstanceClass(AnimBPClass.Class);
@@ -44,11 +43,11 @@ ABase_DrivePawn::ABase_DrivePawn()
 	// Setup friction materials
 	static ConstructorHelpers::FObjectFinder<UPhysicalMaterial> SlipperyMat(TEXT("/Game/VehicleAdv/PhysicsMaterials/Slippery.Slippery"));
 	SlipperyMaterial = SlipperyMat.Object;
-		
+
 	static ConstructorHelpers::FObjectFinder<UPhysicalMaterial> NonSlipperyMat(TEXT("/Game/VehicleAdv/PhysicsMaterials/NonSlippery.NonSlippery"));
 	NonSlipperyMaterial = NonSlipperyMat.Object;
 
-	UWheeledVehicleMovementComponent4W* Vehicle4W = CastChecked<UWheeledVehicleMovementComponent4W>(GetVehicleMovement());
+	UWheeledVehicleMovementComponent4W *Vehicle4W = CastChecked<UWheeledVehicleMovementComponent4W>(GetVehicleMovement());
 
 	check(Vehicle4W->WheelSetups.Num() == 4);
 
@@ -76,24 +75,24 @@ ABase_DrivePawn::ABase_DrivePawn()
 	Vehicle4W->MaxNormalizedTireLoad = 2.0f;
 	Vehicle4W->MaxNormalizedTireLoadFiltered = 2.0f;
 
-	// Engine 
+	// Engine
 	// Torque setup
 	Vehicle4W->MaxEngineRPM = 5700.0f;
 	Vehicle4W->EngineSetup.TorqueCurve.GetRichCurve()->Reset();
 	Vehicle4W->EngineSetup.TorqueCurve.GetRichCurve()->AddKey(0.0f, 400.0f);
 	Vehicle4W->EngineSetup.TorqueCurve.GetRichCurve()->AddKey(1890.0f, 500.0f);
 	Vehicle4W->EngineSetup.TorqueCurve.GetRichCurve()->AddKey(5730.0f, 400.0f);
- 
-	// Adjust the steering 
+
+	// Adjust the steering
 	Vehicle4W->SteeringCurve.GetRichCurve()->Reset();
 	Vehicle4W->SteeringCurve.GetRichCurve()->AddKey(0.0f, 1.0f);
 	Vehicle4W->SteeringCurve.GetRichCurve()->AddKey(40.0f, 0.7f);
 	Vehicle4W->SteeringCurve.GetRichCurve()->AddKey(120.0f, 0.6f);
-			
- 	// Transmission	
+
+	// Transmission
 	// We want 4wd
 	Vehicle4W->DifferentialSetup.DifferentialType = EVehicleDifferential4W::LimitedSlip_4W;
-	
+
 	// Drive the front wheels a little more than the rear
 	Vehicle4W->DifferentialSetup.FrontRearSplit = 0.65;
 
@@ -102,13 +101,12 @@ ABase_DrivePawn::ABase_DrivePawn()
 	Vehicle4W->TransmissionSetup.GearSwitchTime = 0.15f;
 	Vehicle4W->TransmissionSetup.GearAutoBoxLatency = 1.0f;
 
-	Vehicle4W->bDeprecatedSpringOffsetMode = true;// TODO
+	Vehicle4W->bDeprecatedSpringOffsetMode = true; // TODO
 
 	// Physics settings
 	// Adjust the center of mass - the buggy is quite low
-	UPrimitiveComponent* UpdatedPrimitive = Cast<UPrimitiveComponent>(Vehicle4W->UpdatedComponent);
-	if (UpdatedPrimitive)
-	{
+	UPrimitiveComponent *UpdatedPrimitive = Cast<UPrimitiveComponent>(Vehicle4W->UpdatedComponent);
+	if (UpdatedPrimitive) {
 		UpdatedPrimitive->BodyInstance.COMNudge = FVector(8.0f, 0.0f, 0.0f);
 	}
 
@@ -127,7 +125,7 @@ ABase_DrivePawn::ABase_DrivePawn()
 	SpringArm->bInheritYaw = true;
 	SpringArm->bInheritRoll = true;
 
-	// Create the chase camera component 
+	// Create the chase camera component
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("ChaseCamera"));
 	Camera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
 	Camera->SetRelativeLocation(FVector(-125.0, 0.0f, 0.0f));
@@ -135,7 +133,7 @@ ABase_DrivePawn::ABase_DrivePawn()
 	Camera->bUsePawnControlRotation = false;
 	Camera->FieldOfView = 90.f;
 
-	// Create In-Car camera component 
+	// Create In-Car camera component
 	InternalCameraOrigin = FVector(-34.0f, -10.0f, 50.0f);
 	InternalCameraBase = CreateDefaultSubobject<USceneComponent>(TEXT("InternalCameraBase"));
 	InternalCameraBase->SetRelativeLocation(InternalCameraOrigin);
@@ -184,7 +182,7 @@ ABase_DrivePawn::ABase_DrivePawn()
 	HealthExplosion->SetTemplate(FireParticleSystem.Object);
 	HealthExplosion->bAutoActivate = false;
 	HealthExplosion->SetupAttachment(GetMesh());
-	
+
 	// Setup the audio component and allocate it a sound cue
 	static ConstructorHelpers::FObjectFinder<USoundCue> SoundCue(TEXT("/Game/VehicleAdv/Sound/Engine_Loop_Cue.Engine_Loop_Cue"));
 	EngineSoundComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("EngineSound"));
@@ -199,8 +197,7 @@ ABase_DrivePawn::ABase_DrivePawn()
 	bInReverseGear = false;
 }
 
-void ABase_DrivePawn::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
-{
+void ABase_DrivePawn::SetupPlayerInputComponent(class UInputComponent *PlayerInputComponent) {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	// set up gameplay key bindings
@@ -215,60 +212,48 @@ void ABase_DrivePawn::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 	PlayerInputComponent->BindAction("Handbrake", IE_Released, this, &ABase_DrivePawn::OnHandbrakeReleased);
 	PlayerInputComponent->BindAction("SwitchCamera", IE_Pressed, this, &ABase_DrivePawn::OnToggleCamera);
 
-	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &ABase_DrivePawn::OnResetVR); 
+	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &ABase_DrivePawn::OnResetVR);
 }
 
-void ABase_DrivePawn::MoveForward(float Val)
-{
+void ABase_DrivePawn::MoveForward(float Val) {
 	GetVehicleMovementComponent()->SetThrottleInput(Val);
-
 }
 
-void ABase_DrivePawn::MoveRight(float Val)
-{
+void ABase_DrivePawn::MoveRight(float Val) {
 	GetVehicleMovementComponent()->SetSteeringInput(Val);
 }
 
-void ABase_DrivePawn::OnHandbrakePressed()
-{
+void ABase_DrivePawn::OnHandbrakePressed() {
 	GetVehicleMovementComponent()->SetHandbrakeInput(true);
 }
 
-void ABase_DrivePawn::OnHandbrakeReleased()
-{
+void ABase_DrivePawn::OnHandbrakeReleased() {
 	GetVehicleMovementComponent()->SetHandbrakeInput(false);
 }
 
-void ABase_DrivePawn::OnToggleCamera()
-{
+void ABase_DrivePawn::OnToggleCamera() {
 	EnableIncarView(!bInCarCameraActive);
 }
 
-void ABase_DrivePawn::EnableIncarView(const bool bState)
-{
-	if (bState != bInCarCameraActive)
-	{
+void ABase_DrivePawn::EnableIncarView(const bool bState) {
+	if (bState != bInCarCameraActive) {
 		bInCarCameraActive = bState;
 
-		if (bState)
-		{
+		if (bState) {
 			OnResetVR();
 			Camera->Deactivate();
 			InternalCamera->Activate();
-		}
-		else
-		{
+		} else {
 			InternalCamera->Deactivate();
 			Camera->Activate();
 		}
-		
+
 		InCarSpeed->SetVisibility(bInCarCameraActive);
 		InCarGear->SetVisibility(bInCarCameraActive);
 	}
 }
 
-void ABase_DrivePawn::Tick(float Delta)
-{
+void ABase_DrivePawn::Tick(float Delta) {
 	Super::Tick(Delta);
 
 	CurrentDeltaSeconds = Delta;
@@ -277,7 +262,7 @@ void ABase_DrivePawn::Tick(float Delta)
 	bInReverseGear = GetVehicleMovement()->GetCurrentGear() < 0;
 
 	UpdateHealth();
-	
+
 	// Update phsyics material
 	UpdatePhysicsMaterial();
 
@@ -289,33 +274,29 @@ void ABase_DrivePawn::Tick(float Delta)
 
 	bool bHMDActive = false;
 #if HMD_MODULE_INCLUDED
-	if ((GEngine->XRSystem.IsValid() == true ) && ( (GEngine->XRSystem->IsHeadTrackingAllowed() == true) || (GEngine->IsStereoscopic3D() == true)))
-	{
+	if ((GEngine->XRSystem.IsValid() == true) && ((GEngine->XRSystem->IsHeadTrackingAllowed() == true) || (GEngine->IsStereoscopic3D() == true))) {
 		bHMDActive = true;
 	}
 #endif // HMD_MODULE_INCLUDED
-	if (!bHMDActive)
-	{
-		if (InputComponent && bInCarCameraActive)
-		{
+	if (!bHMDActive) {
+		if (InputComponent && bInCarCameraActive) {
 			FRotator HeadRotation = InternalCamera->RelativeRotation;
 			HeadRotation.Pitch += InputComponent->GetAxisValue(LookUpBinding);
 			HeadRotation.Yaw += InputComponent->GetAxisValue(LookRightBinding);
 			InternalCamera->RelativeRotation = HeadRotation;
 		}
-	}	
+	}
 
 	// Pass the engine RPM to the sound component
 	float RPMToAudioScale = 2500.0f / GetVehicleMovement()->GetEngineMaxRotationSpeed();
-	EngineSoundComponent->SetFloatParameter(EngineAudioRPM, GetVehicleMovement()->GetEngineRotationSpeed()*RPMToAudioScale);
+	EngineSoundComponent->SetFloatParameter(EngineAudioRPM, GetVehicleMovement()->GetEngineRotationSpeed() * RPMToAudioScale);
 }
 
-void ABase_DrivePawn::BeginPlay()
-{
+void ABase_DrivePawn::BeginPlay() {
 	Super::BeginPlay();
 
 	bool bWantInCar = false;
-	// First disable both speed/gear displays 
+	// First disable both speed/gear displays
 	bInCarCameraActive = false;
 	InCarSpeed->SetVisibility(bInCarCameraActive);
 	InCarGear->SetVisibility(bInCarCameraActive);
@@ -330,11 +311,9 @@ void ABase_DrivePawn::BeginPlay()
 	EngineSoundComponent->Play();
 }
 
-void ABase_DrivePawn::OnResetVR()
-{
+void ABase_DrivePawn::OnResetVR() {
 #if HMD_MODULE_INCLUDED
-	if (GEngine->XRSystem.IsValid())
-	{
+	if (GEngine->XRSystem.IsValid()) {
 		GEngine->XRSystem->ResetOrientationAndPosition();
 		InternalCamera->SetRelativeLocation(InternalCameraOrigin);
 		GetController()->SetControlRotation(FRotator());
@@ -342,8 +321,7 @@ void ABase_DrivePawn::OnResetVR()
 #endif // HMD_MODULE_INCLUDED
 }
 
-void ABase_DrivePawn::UpdateHUDStrings()
-{
+void ABase_DrivePawn::UpdateHUDStrings() {
 	float KPH = FMath::Abs(GetVehicleMovement()->GetForwardSpeed()) * 0.036f;
 	int32 KPH_int = FMath::FloorToInt(KPH);
 	int32 Gear = GetVehicleMovement()->GetCurrentGear();
@@ -351,49 +329,34 @@ void ABase_DrivePawn::UpdateHUDStrings()
 	// Using FText because this is display text that should be localizable
 	SpeedDisplayString = FText::Format(LOCTEXT("SpeedFormat", "{0} km/h"), FText::AsNumber(KPH_int));
 
-
-	if (bInReverseGear)
-	{
+	if (bInReverseGear) {
 		GearDisplayString = FText(LOCTEXT("ReverseGear", "R"));
-	}
-	else
-	{
+	} else {
 		GearDisplayString = (Gear == 0) ? LOCTEXT("N", "N") : FText::AsNumber(Gear);
 	}
-
 }
 
-void ABase_DrivePawn::SetupInCarHUD()
-{
-	APlayerController* PlayerController = Cast<APlayerController>(GetController());
-	if ((PlayerController != nullptr) && (InCarSpeed != nullptr) && (InCarGear != nullptr))
-	{
+void ABase_DrivePawn::SetupInCarHUD() {
+	APlayerController *PlayerController = Cast<APlayerController>(GetController());
+	if ((PlayerController != nullptr) && (InCarSpeed != nullptr) && (InCarGear != nullptr)) {
 		// Setup the text render component strings
 		InCarSpeed->SetText(SpeedDisplayString);
 		InCarGear->SetText(GearDisplayString);
-		
-		if (bInReverseGear)
-		{
+
+		if (bInReverseGear) {
 			InCarGear->SetTextRenderColor(GearDisplayReverseColor);
-		}
-		else
-		{
+		} else {
 			InCarGear->SetTextRenderColor(GearDisplayColor);
 		}
 	}
 }
 
-void ABase_DrivePawn::UpdatePhysicsMaterial()
-{
-	if (GetActorUpVector().Z < 0)
-	{
-		if (bIsLowFriction)
-		{
+void ABase_DrivePawn::UpdatePhysicsMaterial() {
+	if (GetActorUpVector().Z < 0) {
+		if (bIsLowFriction) {
 			GetMesh()->SetPhysMaterialOverride(NonSlipperyMaterial);
 			bIsLowFriction = false;
-		}
-		else
-		{
+		} else {
 			GetMesh()->SetPhysMaterialOverride(SlipperyMaterial);
 			bIsLowFriction = true;
 		}

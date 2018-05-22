@@ -7,14 +7,9 @@
 #include "Player_DrivePawn.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
-class VEHICLECOMBATGAMECPP_API APlayer_DrivePawn : public ABase_DrivePawn
-{
+class VEHICLECOMBATGAMECPP_API APlayer_DrivePawn : public ABase_DrivePawn {
 	GENERATED_BODY()
-	
-	
-	
-	
 };

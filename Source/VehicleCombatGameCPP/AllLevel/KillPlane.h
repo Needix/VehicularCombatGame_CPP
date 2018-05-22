@@ -9,26 +9,24 @@
 #include "KillPlane.generated.h"
 
 UCLASS()
-class VEHICLECOMBATGAMECPP_API AKillPlane : public AActor
-{
+class VEHICLECOMBATGAMECPP_API AKillPlane : public AActor {
 	GENERATED_BODY()
 
-	/*UPROPERTY(EditDefaultsOnly, Category = "Static Mesh") 
+	/*UPROPERTY(EditDefaultsOnly, Category = "Static Mesh")
 	UStaticMeshComponent* ourMesh;*/
-	
-public:	
+
+  public:
 	// Sets default values for this actor's properties
 	AKillPlane();
 
-protected:
+  protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+  public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-private:
+  private:
 	void InitCustomComponents();
-	
 };

@@ -5,15 +5,14 @@
 #include "CoreMinimal.h"
 
 /**
- * 
+ *
  */
 class VEHICLECOMBATGAMECPP_API GeneralHelper {
-public:
+  public:
 	GeneralHelper();
 	~GeneralHelper();
 
-public:
+  public:
 	const static float LandscapeZStart;
 	const static float LandscapeZEnd;
-	
 };

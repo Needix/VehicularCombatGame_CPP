@@ -7,14 +7,9 @@
 #include "MyGameInstance.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
-class VEHICLECOMBATGAMECPP_API UMyGameInstance : public UGameInstance
-{
+class VEHICLECOMBATGAMECPP_API UMyGameInstance : public UGameInstance {
 	GENERATED_BODY()
-	
-	
-	
-	
 };
