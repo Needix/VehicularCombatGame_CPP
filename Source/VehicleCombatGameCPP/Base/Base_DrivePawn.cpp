@@ -249,8 +249,8 @@ void ABase_DrivePawn::EnableIncarView(const bool bState)
 	if (bState != bInCarCameraActive)
 	{
 		bInCarCameraActive = bState;
-		
-		if (bState == true)
+
+		if (bState)
 		{
 			OnResetVR();
 			Camera->Deactivate();
@@ -294,9 +294,9 @@ void ABase_DrivePawn::Tick(float Delta)
 		bHMDActive = true;
 	}
 #endif // HMD_MODULE_INCLUDED
-	if( bHMDActive == false )
+	if (!bHMDActive)
 	{
-		if ( (InputComponent) && (bInCarCameraActive == true ))
+		if (InputComponent && bInCarCameraActive)
 		{
 			FRotator HeadRotation = InternalCamera->RelativeRotation;
 			HeadRotation.Pitch += InputComponent->GetAxisValue(LookUpBinding);
@@ -352,7 +352,7 @@ void ABase_DrivePawn::UpdateHUDStrings()
 	SpeedDisplayString = FText::Format(LOCTEXT("SpeedFormat", "{0} km/h"), FText::AsNumber(KPH_int));
 
 
-	if (bInReverseGear == true)
+	if (bInReverseGear)
 	{
 		GearDisplayString = FText(LOCTEXT("ReverseGear", "R"));
 	}
@@ -372,13 +372,13 @@ void ABase_DrivePawn::SetupInCarHUD()
 		InCarSpeed->SetText(SpeedDisplayString);
 		InCarGear->SetText(GearDisplayString);
 		
-		if (bInReverseGear == false)
+		if (bInReverseGear)
 		{
-			InCarGear->SetTextRenderColor(GearDisplayColor);
+			InCarGear->SetTextRenderColor(GearDisplayReverseColor);
 		}
 		else
 		{
-			InCarGear->SetTextRenderColor(GearDisplayReverseColor);
+			InCarGear->SetTextRenderColor(GearDisplayColor);
 		}
 	}
 }
@@ -387,7 +387,7 @@ void ABase_DrivePawn::UpdatePhysicsMaterial()
 {
 	if (GetActorUpVector().Z < 0)
 	{
-		if (bIsLowFriction == true)
+		if (bIsLowFriction)
 		{
 			GetMesh()->SetPhysMaterialOverride(NonSlipperyMaterial);
 			bIsLowFriction = false;
