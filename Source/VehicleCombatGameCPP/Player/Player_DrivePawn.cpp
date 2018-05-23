@@ -5,6 +5,7 @@
 #include "Camera/CameraComponent.h"
 #include "Engine/Engine.h"
 #include "Sound/SoundCue.h"
+#include "UObject/ConstructorHelpers.h"
 #include "Components/AudioComponent.h"
 #include "Components/TextRenderComponent.h"
 

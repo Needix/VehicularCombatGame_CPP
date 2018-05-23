@@ -8,6 +8,12 @@
 #include "Landscape.h"
 #include "EngineUtils.h"
 #include "Engine/Engine.h"
+#include "UObject/ConstructorHelpers.h"
+#include "Sound/SoundBase.h"
+#include "Sound/SoundCue.h"
+
+#include "Components/AudioComponent.h"
+
 #include "GameModes/Team.h"
 #include "AI/AI_DrivePawn.h"
 #include "AllLevel/LevelBoundary.h"
@@ -28,9 +34,13 @@ ABase_GameMode::ABase_GameMode() {
 	TeamColors.Add(FVector(0,	255,	255));
 	TeamColors.Add(FVector(0,	0,		0));
 	TeamColors.Add(FVector(255,	255,	255));
+
+	static ConstructorHelpers::FObjectFinder<USoundCue> backgroundMusicObject(TEXT("/Game/VehicularCombatGame/Sound/BackgroundMusic_Cue.BackgroundMusic_Cue"));
+	UGameplayStatics::PlaySound2D(GetWorld(), backgroundMusicObject.Object);
 }
 
 void ABase_GameMode::BeginPlay() {
+
 }
 
 void ABase_GameMode::Tick(float Delta) {
