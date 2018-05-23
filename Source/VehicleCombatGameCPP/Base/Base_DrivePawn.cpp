@@ -1,6 +1,7 @@
 // Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
 
 // Engine Header
+#include "Base_DrivePawn.h"
 #include "Sound/SoundCue.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "Engine/SkeletalMesh.h"
@@ -19,7 +20,6 @@
 #include "Camera/CameraComponent.h"
 
 // Custom Header
-#include "Base_DrivePawn.h"
 #include "VehicleCombatGameCPPWheelFront.h"
 #include "VehicleCombatGameCPPWheelRear.h"
 #include "VehicleCombatGameCPPHud.h"
