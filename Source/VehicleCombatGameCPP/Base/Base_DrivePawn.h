@@ -87,10 +87,6 @@ class ABase_DrivePawn : public AWheeledVehicle {
 	/** Initial offset of incar camera */
 	FVector InternalCameraOrigin;
 
-	// Begin Pawn interface
-	virtual void SetupPlayerInputComponent(UInputComponent *InputComponent) override;
-	// End Pawn interface
-
 	// Begin Actor interface
 	virtual void Tick(float Delta) override;
 
@@ -99,9 +95,6 @@ class ABase_DrivePawn : public AWheeledVehicle {
 
   public:
 	// End Actor interface
-
-	/** Handle pressing forwards */
-	void MoveForward(float Val);
 
 	/** Setup the strings used on the hud */
 	void SetupInCarHUD();
@@ -116,17 +109,6 @@ class ABase_DrivePawn : public AWheeledVehicle {
 	void UpdateHealth();
 
 	void DestroyCar();
-
-	/** Handle pressing right */
-	void MoveRight(float Val);
-	/** Handle handbrake pressed */
-	void OnHandbrakePressed();
-	/** Handle handbrake released */
-	void OnHandbrakeReleased();
-	/** Switch between cameras */
-	void OnToggleCamera();
-	/** Handle reset VR device */
-	void OnResetVR();
 
 	static const FName LookUpBinding;
 	static const FName LookRightBinding;

@@ -197,62 +197,6 @@ ABase_DrivePawn::ABase_DrivePawn() {
 	bInReverseGear = false;
 }
 
-void ABase_DrivePawn::SetupPlayerInputComponent(class UInputComponent *PlayerInputComponent) {
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	// set up gameplay key bindings
-	check(PlayerInputComponent);
-
-	PlayerInputComponent->BindAxis("MoveForward", this, &ABase_DrivePawn::MoveForward);
-	PlayerInputComponent->BindAxis("MoveRight", this, &ABase_DrivePawn::MoveRight);
-	PlayerInputComponent->BindAxis(LookUpBinding);
-	PlayerInputComponent->BindAxis(LookRightBinding);
-
-	PlayerInputComponent->BindAction("Handbrake", IE_Pressed, this, &ABase_DrivePawn::OnHandbrakePressed);
-	PlayerInputComponent->BindAction("Handbrake", IE_Released, this, &ABase_DrivePawn::OnHandbrakeReleased);
-	PlayerInputComponent->BindAction("SwitchCamera", IE_Pressed, this, &ABase_DrivePawn::OnToggleCamera);
-
-	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &ABase_DrivePawn::OnResetVR);
-}
-
-void ABase_DrivePawn::MoveForward(float Val) {
-	GetVehicleMovementComponent()->SetThrottleInput(Val);
-}
-
-void ABase_DrivePawn::MoveRight(float Val) {
-	GetVehicleMovementComponent()->SetSteeringInput(Val);
-}
-
-void ABase_DrivePawn::OnHandbrakePressed() {
-	GetVehicleMovementComponent()->SetHandbrakeInput(true);
-}
-
-void ABase_DrivePawn::OnHandbrakeReleased() {
-	GetVehicleMovementComponent()->SetHandbrakeInput(false);
-}
-
-void ABase_DrivePawn::OnToggleCamera() {
-	EnableIncarView(!bInCarCameraActive);
-}
-
-void ABase_DrivePawn::EnableIncarView(const bool bState) {
-	if (bState != bInCarCameraActive) {
-		bInCarCameraActive = bState;
-
-		if (bState) {
-			OnResetVR();
-			Camera->Deactivate();
-			InternalCamera->Activate();
-		} else {
-			InternalCamera->Deactivate();
-			Camera->Activate();
-		}
-
-		InCarSpeed->SetVisibility(bInCarCameraActive);
-		InCarGear->SetVisibility(bInCarCameraActive);
-	}
-}
-
 void ABase_DrivePawn::Tick(float Delta) {
 	Super::Tick(Delta);
 
@@ -295,30 +239,13 @@ void ABase_DrivePawn::Tick(float Delta) {
 void ABase_DrivePawn::BeginPlay() {
 	Super::BeginPlay();
 
-	bool bWantInCar = false;
 	// First disable both speed/gear displays
 	bInCarCameraActive = false;
 	InCarSpeed->SetVisibility(bInCarCameraActive);
 	InCarGear->SetVisibility(bInCarCameraActive);
 
-	// Enable in car view if HMD is attached
-#if HMD_MODULE_INCLUDED
-	bWantInCar = UHeadMountedDisplayFunctionLibrary::IsHeadMountedDisplayEnabled();
-#endif // HMD_MODULE_INCLUDED
-
-	EnableIncarView(bWantInCar);
 	// Start an engine sound playing
 	EngineSoundComponent->Play();
-}
-
-void ABase_DrivePawn::OnResetVR() {
-#if HMD_MODULE_INCLUDED
-	if (GEngine->XRSystem.IsValid()) {
-		GEngine->XRSystem->ResetOrientationAndPosition();
-		InternalCamera->SetRelativeLocation(InternalCameraOrigin);
-		GetController()->SetControlRotation(FRotator());
-	}
-#endif // HMD_MODULE_INCLUDED
 }
 
 void ABase_DrivePawn::UpdateHUDStrings() {
