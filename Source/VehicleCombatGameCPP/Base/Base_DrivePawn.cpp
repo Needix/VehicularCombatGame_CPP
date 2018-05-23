@@ -1,23 +1,28 @@
 // Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
 
-#include "Base_DrivePawn.h"
-#include "VehicleCombatGameCPPWheelFront.h"
-#include "VehicleCombatGameCPPWheelRear.h"
-#include "VehicleCombatGameCPPHud.h"
-#include "Components/SkeletalMeshComponent.h"
-#include "GameFramework/SpringArmComponent.h"
-#include "Camera/CameraComponent.h"
-#include "Components/InputComponent.h"
-#include "Components/TextRenderComponent.h"
-#include "Components/AudioComponent.h"
+// Engine Header
 #include "Sound/SoundCue.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
-#include "WheeledVehicleMovementComponent4W.h"
 #include "Engine/SkeletalMesh.h"
 #include "Engine/Engine.h"
 #include "GameFramework/Controller.h"
 #include "UObject/ConstructorHelpers.h"
-#include "Runtime/Engine/Classes/Particles/ParticleSystemComponent.h"
+
+// Components Header
+#include "Components/SkeletalMeshComponent.h"
+#include "GameFramework/SpringArmComponent.h"
+#include "Components/InputComponent.h"
+#include "Components/TextRenderComponent.h"
+#include "Components/AudioComponent.h"
+#include "WheeledVehicleMovementComponent4W.h"
+#include "Particles/ParticleSystemComponent.h"
+#include "Camera/CameraComponent.h"
+
+// Custom Header
+#include "Base_DrivePawn.h"
+#include "VehicleCombatGameCPPWheelFront.h"
+#include "VehicleCombatGameCPPWheelRear.h"
+#include "VehicleCombatGameCPPHud.h"
 
 // Needed for VR Headset
 #if HMD_MODULE_INCLUDED
@@ -235,7 +240,6 @@ void ABase_DrivePawn::UpdateSound() {
 	float RPMToAudioScale = 2500.0f / GetVehicleMovement()->GetEngineMaxRotationSpeed();
 	EngineSoundComponent->SetFloatParameter(EngineAudioRPM, GetVehicleMovement()->GetEngineRotationSpeed() * RPMToAudioScale);
 }
-
 void ABase_DrivePawn::UpdateHUDStrings() {
 	float KPH = FMath::Abs(GetVehicleMovement()->GetForwardSpeed()) * 0.036f;
 	int32 KPH_int = FMath::FloorToInt(KPH);
@@ -250,7 +254,6 @@ void ABase_DrivePawn::UpdateHUDStrings() {
 		GearDisplayString = (Gear == 0) ? LOCTEXT("N", "N") : FText::AsNumber(Gear);
 	}
 }
-
 void ABase_DrivePawn::UpdateInCarHUD() {
 	APlayerController *PlayerController = Cast<APlayerController>(GetController());
 	if ((PlayerController != nullptr) && (InCarSpeed != nullptr) && (InCarGear != nullptr)) {

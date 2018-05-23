@@ -1,12 +1,18 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+// Engine Header
 #include "Team.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "EngineUtils.h"
 #include "Landscape.h"
+#include "UObject/ConstructorHelpers.h"
 
+// Component Header
+#include "Particles/ParticleSystemComponent.h"
+
+// Custom Header
 #include "AI/AI_DrivePawn.h"
 #include "Helper/GeneralHelper.h"
 #include "Base/Base_GameMode.h"
@@ -17,6 +23,49 @@ ATeam::ATeam() {
 	PrimaryActorTick.bCanEverTick = true;
 
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneComponent"));
+	
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> baseParticleSystem(TEXT("ParticleSystem'/Game/VehicularCombatGame/ParticleEffects/CTF_HomeParticleSystem.CTF_HomeParticleSystem'"));
+	baseParticleSystemComponent = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Base_ParticleSystem"));
+	baseParticleSystemComponent->Template = baseParticleSystem.Object;
+	baseParticleSystemComponent->SetupAttachment(RootComponent);
+	
+}
+
+void ATeam::Setup(FString pName, int pId, FVector pColor) {
+	Name = pName;
+	Id = pId;
+	Color = pColor;
+
+	FParticleSysParam sysParam = FParticleSysParam();
+	sysParam.Name = FName(TEXT("PSpawn"));
+	sysParam.ParamType = PSPT_Scalar;
+	sysParam.Scalar = 0.1;
+	baseParticleSystemComponent->InstanceParameters.Add(sysParam);
+
+	FParticleSysParam sysParam2 = FParticleSysParam();
+	sysParam2.Name = FName(TEXT("PColor"));
+	sysParam2.ParamType = PSPT_Vector;
+	sysParam2.Vector = FVector(1, 0, 0);
+	baseParticleSystemComponent->InstanceParameters.Add(sysParam2);
+
+	FParticleSysParam sysParam3 = FParticleSysParam();
+	sysParam3.Name = FName(TEXT("PCylinder"));
+	sysParam3.ParamType = PSPT_Scalar;
+	sysParam3.Scalar = 0.4;
+	baseParticleSystemComponent->InstanceParameters.Add(sysParam3);
+
+	FParticleSysParam sysParam4 = FParticleSysParam();
+	sysParam4.Name = FName(TEXT("None"));
+	sysParam4.ParamType = PSPT_Actor;
+	sysParam4.Actor = NULL;
+	baseParticleSystemComponent->InstanceParameters.Add(sysParam4);
+
+	FParticleSysParam sysParam5 = FParticleSysParam();
+	sysParam5.Name = FName(TEXT("SmokeEmitterColor"));
+	sysParam5.ParamType = PSPT_Vector;
+	sysParam5.Vector = pColor;
+	baseParticleSystemComponent->InstanceParameters.Add(sysParam5);
+
 }
 
 // Called when the game starts or when spawned

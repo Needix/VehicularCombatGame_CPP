@@ -16,9 +16,14 @@ class VEHICLECOMBATGAMECPP_API ABase_GameMode : public AGameMode {
 
 	// Variables
   private:
+	// Level Boundary
 	FVector LevelBoundary1 = FVector(0, 0, 0);
 	FVector LevelBoundary2 = FVector(0, 0, 0);
 	bool LevelBoundarySet = false;
+
+	// Color
+	TArray<FVector> TeamColors; 
+
 
   public:
 	const int CONST_DeathRespawnTime = 3;

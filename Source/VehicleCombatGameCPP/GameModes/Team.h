@@ -2,10 +2,16 @@
 
 #pragma once
 
+// Engine Header
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+
+// Component Header
+#include "Particles/ParticleSystemComponent.h"
+
+// Custom Header
 #include "Base/Base_DrivePawn.h"
-//#include "Controller.h"
+
 #include "Team.generated.h"
 
 UCLASS()
@@ -16,16 +22,17 @@ class VEHICLECOMBATGAMECPP_API ATeam : public AActor {
   private:
 	float DeltaSeconds;
 	float AI_RespawnTimer;
+	FString Name;
+	int Id;
+	FVector Color;
+
+	UParticleSystemComponent* baseParticleSystemComponent;
 
   public:
 	UPROPERTY()
-	TArray<AController *> TeamPlayer;
+	TArray<AController*> TeamPlayer;
 
 	// Functions
-  public:
-	// Sets default values for this actor's properties
-	ATeam();
-
   private:
 	void HandleAIRespawn(float DeltaTime);
 
@@ -34,6 +41,10 @@ class VEHICLECOMBATGAMECPP_API ATeam : public AActor {
 	virtual void BeginPlay() override;
 
   public:
+	ATeam();
+
+	void Setup(FString name, int id, FVector color);
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 

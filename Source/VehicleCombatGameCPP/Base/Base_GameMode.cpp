@@ -1,5 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+// Engine Header
 #include "Base_GameMode.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -18,6 +19,15 @@ ABase_GameMode::ABase_GameMode() {
 	DefaultPawnClass = NULL;
 	// HUDClass = AVehicleCombatGameCPPHud::StaticClass();
 	PlayerControllerClass = APlayer_Controller::StaticClass();
+
+	TeamColors.Add(FVector(255,	0,		0));
+	TeamColors.Add(FVector(0,	255,	0));
+	TeamColors.Add(FVector(0,	0,		255));
+	TeamColors.Add(FVector(255,	255,	0));
+	TeamColors.Add(FVector(255,	0,		255));
+	TeamColors.Add(FVector(0,	255,	255));
+	TeamColors.Add(FVector(0,	0,		0));
+	TeamColors.Add(FVector(255,	255,	255));
 }
 
 void ABase_GameMode::BeginPlay() {
@@ -66,7 +76,7 @@ void ABase_GameMode::CreateTeams() {
 			TArray<AActor *> actorsToIgnore;
 			TArray<TEnumAsByte<EObjectTypeQuery>> objectTypes;
 			objectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldStatic));
-			bool traceSuccess = UKismetSystemLibrary::LineTraceSingleForObjects(GetWorld(), lineTraceStart, lineTraceEnd, objectTypes, false, actorsToIgnore, EDrawDebugTrace::Persistent, outHit, true);
+			bool traceSuccess = UKismetSystemLibrary::LineTraceSingleForObjects(GetWorld(), lineTraceStart, lineTraceEnd, objectTypes, false, actorsToIgnore, EDrawDebugTrace::None, outHit, true);
 
 			if (traceSuccess && outHit.Actor->GetClass()->IsChildOf(ALandscape::StaticClass())) {
 				outHit.Location.Z = outHit.Location.Z + 100;
@@ -74,6 +84,7 @@ void ABase_GameMode::CreateTeams() {
 				FActorSpawnParameters spawnParameters;
 				spawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 				ATeam *team = GetWorld()->SpawnActor<ATeam>(ATeam::StaticClass(), spawnTransform, spawnParameters);
+				team->Setup(FString(TEXT("Team ") + (i + 1)), i, TeamColors[i]);
 				Teams.Add(team);
 				break;
 			}
