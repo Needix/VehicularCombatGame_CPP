@@ -14,8 +14,13 @@ UCLASS()
 class VEHICLECOMBATGAMECPP_API APlayer_Controller : public APlayerController {
 	GENERATED_BODY()
 	
+
 	public:
 		ATeam* Team;
+		float RespawnTimer;
+
+	public:
+		virtual void Tick(float Delta) override;
 	
 	
 };

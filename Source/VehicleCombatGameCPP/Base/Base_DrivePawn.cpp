@@ -1,5 +1,6 @@
 // Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
 
+#include "Base_DrivePawn.h"
 // Engine Header
 #include "Sound/SoundCue.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
@@ -19,10 +20,11 @@
 #include "Camera/CameraComponent.h"
 
 // Custom Header
-#include "Base_DrivePawn.h"
 #include "VehicleCombatGameCPPWheelFront.h"
 #include "VehicleCombatGameCPPWheelRear.h"
 #include "VehicleCombatGameCPPHud.h"
+#include "AllLevel/KillPlane.h"
+#include "Helper/GeneralHelper.h"
 
 // Needed for VR Headset
 #if HMD_MODULE_INCLUDED
@@ -44,6 +46,7 @@ ABase_DrivePawn::ABase_DrivePawn() {
 	static ConstructorHelpers::FObjectFinder<UPhysicalMaterial> NonSlipperyMat(TEXT("/Game/VehicleAdv/PhysicsMaterials/NonSlippery.NonSlippery"));
 	NonSlipperyMaterial = NonSlipperyMat.Object;
 	
+	InitializeEventDelegates();
 	InitializeCar();
 	InitializeOtherComponents();
 	InitializeParticleSystems();
@@ -56,6 +59,33 @@ ABase_DrivePawn::ABase_DrivePawn() {
 	bInReverseGear = false;
 }
 
+void ABase_DrivePawn::BeginPlay() {
+	Super::BeginPlay();
+
+	// First disable both speed/gear displays
+	bInCarCameraActive = false;
+	InCarSpeed->SetVisibility(bInCarCameraActive);
+	InCarGear->SetVisibility(bInCarCameraActive);
+
+	// Start an engine sound playing
+	EngineSoundComponent->Play();
+}
+
+void ABase_DrivePawn::InitializeEventDelegates() {
+	GetMesh()->bGenerateOverlapEvents = true;
+
+	FScriptDelegate overlapDelegate1;
+    overlapDelegate1.BindUFunction(this, "HandleOverlapStartEvent");
+	OnActorBeginOverlap.AddUnique(overlapDelegate1);
+
+	FScriptDelegate overlapDelegate2;
+    overlapDelegate2.BindUFunction(this, "HandleOverlapEndEvent");
+	OnActorEndOverlap.AddUnique(overlapDelegate2);
+
+	FScriptDelegate hitDelegate;
+    hitDelegate.BindUFunction(this, "HandleHitEvent");
+	GetMesh()->OnComponentHit.AddUnique(hitDelegate);
+}
 void ABase_DrivePawn::InitializeBasicComponents() {
 	// Car mesh
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CarMesh(TEXT("/Game/VehicleAdv/Vehicle/Vehicle_SkelMesh.Vehicle_SkelMesh"));
@@ -64,6 +94,8 @@ void ABase_DrivePawn::InitializeBasicComponents() {
 	static ConstructorHelpers::FClassFinder<UObject> AnimBPClass(TEXT("/Game/VehicleAdv/Vehicle/VehicleAnimationBlueprint"));
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 	GetMesh()->SetAnimInstanceClass(AnimBPClass.Class);
+
+	GetMesh()->bGenerateOverlapEvents = true;
 }
 void ABase_DrivePawn::InitializeParticleSystems() {
 	static ConstructorHelpers::FObjectFinder<UParticleSystem> ExhaustParticleSystem(TEXT("ParticleSystem'/Game/VehicularCombatGame/ParticleEffects/Fire.Fire'"));
@@ -222,19 +254,6 @@ void ABase_DrivePawn::Tick(float Delta) {
 	UpdateInCarHUD();
 	UpdateSound();
 }
-
-void ABase_DrivePawn::BeginPlay() {
-	Super::BeginPlay();
-
-	// First disable both speed/gear displays
-	bInCarCameraActive = false;
-	InCarSpeed->SetVisibility(bInCarCameraActive);
-	InCarGear->SetVisibility(bInCarCameraActive);
-
-	// Start an engine sound playing
-	EngineSoundComponent->Play();
-}
-
 void ABase_DrivePawn::UpdateSound() {
 	// Pass the engine RPM to the sound component
 	float RPMToAudioScale = 2500.0f / GetVehicleMovement()->GetEngineMaxRotationSpeed();
@@ -268,7 +287,6 @@ void ABase_DrivePawn::UpdateInCarHUD() {
 		}
 	}
 }
-
 void ABase_DrivePawn::UpdatePhysicsMaterial() {
 	if (GetActorUpVector().Z < 0) {
 		if (bIsLowFriction) {
@@ -278,6 +296,25 @@ void ABase_DrivePawn::UpdatePhysicsMaterial() {
 			GetMesh()->SetPhysMaterialOverride(SlipperyMaterial);
 			bIsLowFriction = true;
 		}
+	}
+}
+
+void ABase_DrivePawn::HandleOverlapStartEvent(class AActor* myActor, class AActor* otherActor) {
+	if(otherActor->GetClass()->IsChildOf(AKillPlane::StaticClass())) {
+		AKillPlane* killPlane = CastChecked<AKillPlane>(otherActor);
+		IsCollidingWithKillPlane = true;
+	}
+}
+void ABase_DrivePawn::HandleOverlapEndEvent(class AActor* myActor, class AActor* otherActor) {
+	if(otherActor->GetClass()->IsChildOf(AKillPlane::StaticClass())) {
+		AKillPlane* killPlane = CastChecked<AKillPlane>(otherActor);
+		IsCollidingWithKillPlane = killPlane->GetActorLocation().Z > this->GetActorLocation().Z;
+	}
+}
+
+void ABase_DrivePawn::HandleHitEvent(UPrimitiveComponent* hitComponent, AActor* otherActor, UPrimitiveComponent* otherComponent, FVector normalImpulse, FHitResult& hit) {
+	if(otherActor->GetClass()->IsChildOf(ABase_DrivePawn::StaticClass())) {
+		DecreaseHealthByFloat(normalImpulse.Size() * GeneralHelper::CarCollisionForceMultiplier);
 	}
 }
 

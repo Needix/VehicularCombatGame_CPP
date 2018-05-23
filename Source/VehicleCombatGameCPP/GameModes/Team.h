@@ -35,6 +35,7 @@ class VEHICLECOMBATGAMECPP_API ATeam : public AActor {
 	// Functions
   private:
 	void HandleAIRespawn(float DeltaTime);
+	void HandlePlayerRespawn(float Delta);
 
   protected:
 	// Called when the game starts or when spawned

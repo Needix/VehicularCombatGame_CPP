@@ -91,7 +91,17 @@ class ABase_DrivePawn : public AWheeledVehicle {
   private:
 	float CurrentDeltaSeconds;
 
+	/*UFUNCTION()
+	void ActorBeginOverlap1(class AActor* actor, class AActor* otherActor);*/
+	UFUNCTION()
+	void HandleOverlapStartEvent(class AActor* myActor, class AActor* otherActor);
+	UFUNCTION()
+	void HandleOverlapEndEvent(class AActor* myActor, class AActor* otherActor);
+	UFUNCTION()
+	void HandleHitEvent(UPrimitiveComponent* hitComponent, AActor* actor, UPrimitiveComponent* otherComponent, FVector normalImpulse, FHitResult& hit);
+
 	// Used to initialize the car at spawn. Called only once at "BeginPlay"
+	void InitializeEventDelegates();
 	void InitializeBasicComponents();
 	void InitializeCar();
 	void InitializeParticleSystems();

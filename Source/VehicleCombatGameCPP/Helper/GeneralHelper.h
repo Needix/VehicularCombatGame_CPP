@@ -15,4 +15,6 @@ class VEHICLECOMBATGAMECPP_API GeneralHelper {
   public:
 	const static float LandscapeZStart;
 	const static float LandscapeZEnd;
+	const static float CarCollisionForceMultiplier;
+	const static float PlayerRespawnTime;
 };

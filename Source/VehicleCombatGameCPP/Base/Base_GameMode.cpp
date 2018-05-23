@@ -101,9 +101,6 @@ void ABase_GameMode::CreateTeams() {
 void ABase_GameMode::SpawnPlayer(ATeam *team) {
 	APlayerController *pc = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	ABase_DrivePawn *spawnedCar = team->SpawnCar(pc, APlayer_DrivePawn::StaticClass());
-
-	APlayer_Controller *playerController = CastChecked<APlayer_Controller>(pc);
-	playerController->Team = team;
 }
 
 void ABase_GameMode::SpawnAIs() {

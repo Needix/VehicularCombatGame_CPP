@@ -16,6 +16,8 @@
 #include "AI/AI_DrivePawn.h"
 #include "Helper/GeneralHelper.h"
 #include "Base/Base_GameMode.h"
+#include "Player/Player_Controller.h"
+#include "Player/Player_DrivePawn.h"
 
 // Sets default values
 ATeam::ATeam() {
@@ -76,7 +78,19 @@ void ATeam::BeginPlay() {
 // Called every frame
 void ATeam::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
+	HandlePlayerRespawn(DeltaTime);
 	HandleAIRespawn(DeltaTime);
+}
+
+void ATeam::HandlePlayerRespawn(float DeltaTime) {
+	for(int i = 0; i < TeamPlayer.Num(); i++) {
+		if(TeamPlayer[i]->GetClass()->IsChildOf(APlayer_Controller::StaticClass())) {
+			APlayer_Controller* aPlayerController = CastChecked<APlayer_Controller>(TeamPlayer[i]);
+			if(aPlayerController->RespawnTimer > GeneralHelper::PlayerRespawnTime) {
+				ABase_DrivePawn* newCar = SpawnCar(aPlayerController, APlayer_DrivePawn::StaticClass(), i);
+			}
+		}
+	}
 }
 
 void ATeam::HandleAIRespawn(float DeltaTime) {
@@ -135,6 +149,8 @@ ABase_DrivePawn *ATeam::SpawnCar(AController *controller, UClass *driveClass, in
 					controller = result->GetController();
 				} else {
 					controller->Possess(result);
+					APlayer_Controller *playerController = CastChecked<APlayer_Controller>(controller);
+					playerController->Team = this;
 				}
 
 				if (controllerIndex < 0) {
