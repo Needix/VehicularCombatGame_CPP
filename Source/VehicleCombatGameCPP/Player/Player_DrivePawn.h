@@ -13,7 +13,11 @@ UCLASS()
 class VEHICLECOMBATGAMECPP_API APlayer_DrivePawn : public ABase_DrivePawn {
 	GENERATED_BODY()
 
+	UPROPERTY(Category = Display, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UAudioComponent *HornSoundComponent;
+
   public:
+	APlayer_DrivePawn();
 	// INPUTS
 	void MoveForward(float Val);
 	void MoveRight(float Val);
@@ -21,6 +25,7 @@ class VEHICLECOMBATGAMECPP_API APlayer_DrivePawn : public ABase_DrivePawn {
 	void OnHandbrakeReleased();
 	void OnToggleCamera();
 	void OnResetVR();
+	void OnHorn();
 
 	virtual void SetupPlayerInputComponent(UInputComponent *InputComponent) override;
 	virtual void BeginPlay() override;

@@ -4,6 +4,8 @@
 #include "WheeledVehicleMovementComponent4W.h"
 #include "Camera/CameraComponent.h"
 #include "Engine/Engine.h"
+#include "Sound/SoundCue.h"
+#include "Components/AudioComponent.h"
 #include "Components/TextRenderComponent.h"
 
 // Needed for VR Headset
@@ -14,6 +16,14 @@
 
 const FName APlayer_DrivePawn::LookUpBinding("LookUp");
 const FName APlayer_DrivePawn::LookRightBinding("LookRight");
+
+APlayer_DrivePawn::APlayer_DrivePawn() {
+	static ConstructorHelpers::FObjectFinder<USoundCue> SoundCue(TEXT("/Game/VehicularCombatGame/Sound/Horn.Horn"));
+	HornSoundComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("HornSound"));
+	HornSoundComponent->bAutoActivate = false;
+	HornSoundComponent->SetSound(SoundCue.Object);
+	HornSoundComponent->SetupAttachment(GetMesh());
+}
 
 void APlayer_DrivePawn::BeginPlay() {
 	Super::BeginPlay();
@@ -46,6 +56,7 @@ void APlayer_DrivePawn::SetupPlayerInputComponent(class UInputComponent *PlayerI
 	PlayerInputComponent->BindAction("SwitchCamera", IE_Pressed, this, &APlayer_DrivePawn::OnToggleCamera);
 
 	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &APlayer_DrivePawn::OnResetVR);
+	PlayerInputComponent->BindAction("Horn", IE_Pressed, this, &APlayer_DrivePawn::OnHorn);
 }
 
 void APlayer_DrivePawn::MoveForward(float Val) {
@@ -113,4 +124,6 @@ void APlayer_DrivePawn::OnToggleCamera() {
 	EnableIncarView(!bInCarCameraActive);
 }
 
-
+void APlayer_DrivePawn::OnHorn() {
+	HornSoundComponent->Play();
+}
