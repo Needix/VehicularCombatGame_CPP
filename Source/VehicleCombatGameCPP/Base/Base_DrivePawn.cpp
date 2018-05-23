@@ -25,20 +25,12 @@
 #include "HeadMountedDisplayFunctionLibrary.h"
 #endif // HMD_MODULE_INCLUDED
 
-const FName ABase_DrivePawn::LookUpBinding("LookUp");
-const FName ABase_DrivePawn::LookRightBinding("LookRight");
 const FName ABase_DrivePawn::EngineAudioRPM("RPM");
 
 #define LOCTEXT_NAMESPACE "VehiclePawn"
 
 ABase_DrivePawn::ABase_DrivePawn() {
-	// Car mesh
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CarMesh(TEXT("/Game/VehicleAdv/Vehicle/Vehicle_SkelMesh.Vehicle_SkelMesh"));
-	GetMesh()->SetSkeletalMesh(CarMesh.Object);
-
-	static ConstructorHelpers::FClassFinder<UObject> AnimBPClass(TEXT("/Game/VehicleAdv/Vehicle/VehicleAnimationBlueprint"));
-	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
-	GetMesh()->SetAnimInstanceClass(AnimBPClass.Class);
+	InitializeBasicComponents();
 
 	// Setup friction materials
 	static ConstructorHelpers::FObjectFinder<UPhysicalMaterial> SlipperyMat(TEXT("/Game/VehicleAdv/PhysicsMaterials/Slippery.Slippery"));
@@ -46,11 +38,57 @@ ABase_DrivePawn::ABase_DrivePawn() {
 
 	static ConstructorHelpers::FObjectFinder<UPhysicalMaterial> NonSlipperyMat(TEXT("/Game/VehicleAdv/PhysicsMaterials/NonSlippery.NonSlippery"));
 	NonSlipperyMaterial = NonSlipperyMat.Object;
+	
+	InitializeCar();
+	InitializeOtherComponents();
+	InitializeParticleSystems();
 
+	// Colors for the in-car gear display. One for normal one for reverse
+	GearDisplayReverseColor = FColor(255, 0, 0, 255);
+	GearDisplayColor = FColor(255, 255, 255, 255);
+
+	bIsLowFriction = false;
+	bInReverseGear = false;
+}
+
+void ABase_DrivePawn::InitializeBasicComponents() {
+	// Car mesh
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CarMesh(TEXT("/Game/VehicleAdv/Vehicle/Vehicle_SkelMesh.Vehicle_SkelMesh"));
+	GetMesh()->SetSkeletalMesh(CarMesh.Object);
+
+	static ConstructorHelpers::FClassFinder<UObject> AnimBPClass(TEXT("/Game/VehicleAdv/Vehicle/VehicleAnimationBlueprint"));
+	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+	GetMesh()->SetAnimInstanceClass(AnimBPClass.Class);
+}
+void ABase_DrivePawn::InitializeParticleSystems() {
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> ExhaustParticleSystem(TEXT("ParticleSystem'/Game/VehicularCombatGame/ParticleEffects/Fire.Fire'"));
+	ExhaustParticles = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("ExhaustParticles"));
+	ExhaustParticles->SetRelativeLocation(FVector(-78.8f, -5.8f, 26.6f));
+	ExhaustParticles->SetTemplate(ExhaustParticleSystem.Object);
+	ExhaustParticles->SetupAttachment(GetMesh());
+
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> SmokeParticleSystem(TEXT("ParticleSystem'/Game/StarterContent/Particles/P_Smoke.P_Smoke'"));
+	HealthSmoke = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("HealthSmoke"));
+	HealthSmoke->SetTemplate(SmokeParticleSystem.Object);
+	HealthSmoke->bAutoActivate = false;
+	HealthSmoke->SetupAttachment(GetMesh());
+
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> FireParticleSystem(TEXT("ParticleSystem'/Game/StarterContent/Particles/P_Fire.P_Fire'"));
+	HealthFire = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("HealthFire"));
+	HealthFire->SetTemplate(FireParticleSystem.Object);
+	HealthFire->bAutoActivate = false;
+	HealthFire->SetupAttachment(GetMesh());
+
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> ExplosionParticleSystem(TEXT("ParticleSystem'/Game/StarterContent/Particles/P_Explosion.P_Explosion'"));
+	HealthExplosion = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("HealthExplosion"));
+	HealthExplosion->SetTemplate(FireParticleSystem.Object);
+	HealthExplosion->bAutoActivate = false;
+	HealthExplosion->SetupAttachment(GetMesh());
+}
+void ABase_DrivePawn::InitializeCar() {
 	UWheeledVehicleMovementComponent4W *Vehicle4W = CastChecked<UWheeledVehicleMovementComponent4W>(GetVehicleMovement());
 
 	check(Vehicle4W->WheelSetups.Num() == 4);
-
 	// Wheels/Tyres
 	// Setup the wheels
 	Vehicle4W->WheelSetups[0].WheelClass = UVehicleCombatGameCPPWheelFront::StaticClass();
@@ -112,7 +150,8 @@ ABase_DrivePawn::ABase_DrivePawn() {
 
 	// Set the inertia scale. This controls how the mass of the vehicle is distributed.
 	Vehicle4W->InertiaTensorScale = FVector(1.0f, 1.333f, 1.2f);
-
+}
+void ABase_DrivePawn::InitializeOtherComponents() {
 	// Create a spring arm component for our chase camera
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetRelativeLocation(FVector(0.0f, 0.0f, 34.0f));
@@ -159,81 +198,24 @@ ABase_DrivePawn::ABase_DrivePawn() {
 	InCarGear->SetRelativeRotation(FRotator(0.0f, 180.0f, 0.0f));
 	InCarGear->SetupAttachment(GetMesh());
 
-	static ConstructorHelpers::FObjectFinder<UParticleSystem> ExhaustParticleSystem(TEXT("ParticleSystem'/Game/VehicularCombatGame/ParticleEffects/Fire.Fire'"));
-	ExhaustParticles = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("ExhaustParticles"));
-	ExhaustParticles->SetRelativeLocation(FVector(-78.8f, -5.8f, 26.6f));
-	ExhaustParticles->SetTemplate(ExhaustParticleSystem.Object);
-	ExhaustParticles->SetupAttachment(GetMesh());
-
-	static ConstructorHelpers::FObjectFinder<UParticleSystem> SmokeParticleSystem(TEXT("ParticleSystem'/Game/StarterContent/Particles/P_Smoke.P_Smoke'"));
-	HealthSmoke = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("HealthSmoke"));
-	HealthSmoke->SetTemplate(SmokeParticleSystem.Object);
-	HealthSmoke->bAutoActivate = false;
-	HealthSmoke->SetupAttachment(GetMesh());
-
-	static ConstructorHelpers::FObjectFinder<UParticleSystem> FireParticleSystem(TEXT("ParticleSystem'/Game/StarterContent/Particles/P_Fire.P_Fire'"));
-	HealthFire = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("HealthFire"));
-	HealthFire->SetTemplate(FireParticleSystem.Object);
-	HealthFire->bAutoActivate = false;
-	HealthFire->SetupAttachment(GetMesh());
-
-	static ConstructorHelpers::FObjectFinder<UParticleSystem> ExplosionParticleSystem(TEXT("ParticleSystem'/Game/StarterContent/Particles/P_Explosion.P_Explosion'"));
-	HealthExplosion = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("HealthExplosion"));
-	HealthExplosion->SetTemplate(FireParticleSystem.Object);
-	HealthExplosion->bAutoActivate = false;
-	HealthExplosion->SetupAttachment(GetMesh());
-
 	// Setup the audio component and allocate it a sound cue
 	static ConstructorHelpers::FObjectFinder<USoundCue> SoundCue(TEXT("/Game/VehicleAdv/Sound/Engine_Loop_Cue.Engine_Loop_Cue"));
 	EngineSoundComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("EngineSound"));
 	EngineSoundComponent->SetSound(SoundCue.Object);
 	EngineSoundComponent->SetupAttachment(GetMesh());
-
-	// Colors for the in-car gear display. One for normal one for reverse
-	GearDisplayReverseColor = FColor(255, 0, 0, 255);
-	GearDisplayColor = FColor(255, 255, 255, 255);
-
-	bIsLowFriction = false;
-	bInReverseGear = false;
 }
 
 void ABase_DrivePawn::Tick(float Delta) {
 	Super::Tick(Delta);
 
 	CurrentDeltaSeconds = Delta;
-
-	// Setup the flag to say we are in reverse gear
 	bInReverseGear = GetVehicleMovement()->GetCurrentGear() < 0;
 
 	UpdateHealth();
-
-	// Update phsyics material
 	UpdatePhysicsMaterial();
-
-	// Update the strings used in the hud (incar and onscreen)
 	UpdateHUDStrings();
-
-	// Set the string in the incar hud
-	SetupInCarHUD();
-
-	bool bHMDActive = false;
-#if HMD_MODULE_INCLUDED
-	if ((GEngine->XRSystem.IsValid() == true) && ((GEngine->XRSystem->IsHeadTrackingAllowed() == true) || (GEngine->IsStereoscopic3D() == true))) {
-		bHMDActive = true;
-	}
-#endif // HMD_MODULE_INCLUDED
-	if (!bHMDActive) {
-		if (InputComponent && bInCarCameraActive) {
-			FRotator HeadRotation = InternalCamera->RelativeRotation;
-			HeadRotation.Pitch += InputComponent->GetAxisValue(LookUpBinding);
-			HeadRotation.Yaw += InputComponent->GetAxisValue(LookRightBinding);
-			InternalCamera->RelativeRotation = HeadRotation;
-		}
-	}
-
-	// Pass the engine RPM to the sound component
-	float RPMToAudioScale = 2500.0f / GetVehicleMovement()->GetEngineMaxRotationSpeed();
-	EngineSoundComponent->SetFloatParameter(EngineAudioRPM, GetVehicleMovement()->GetEngineRotationSpeed() * RPMToAudioScale);
+	UpdateInCarHUD();
+	UpdateSound();
 }
 
 void ABase_DrivePawn::BeginPlay() {
@@ -246,6 +228,12 @@ void ABase_DrivePawn::BeginPlay() {
 
 	// Start an engine sound playing
 	EngineSoundComponent->Play();
+}
+
+void ABase_DrivePawn::UpdateSound() {
+	// Pass the engine RPM to the sound component
+	float RPMToAudioScale = 2500.0f / GetVehicleMovement()->GetEngineMaxRotationSpeed();
+	EngineSoundComponent->SetFloatParameter(EngineAudioRPM, GetVehicleMovement()->GetEngineRotationSpeed() * RPMToAudioScale);
 }
 
 void ABase_DrivePawn::UpdateHUDStrings() {
@@ -263,7 +251,7 @@ void ABase_DrivePawn::UpdateHUDStrings() {
 	}
 }
 
-void ABase_DrivePawn::SetupInCarHUD() {
+void ABase_DrivePawn::UpdateInCarHUD() {
 	APlayerController *PlayerController = Cast<APlayerController>(GetController());
 	if ((PlayerController != nullptr) && (InCarSpeed != nullptr) && (InCarGear != nullptr)) {
 		// Setup the text render component strings
@@ -293,7 +281,6 @@ void ABase_DrivePawn::UpdatePhysicsMaterial() {
 void ABase_DrivePawn::DecreaseHealthByTime(float deltaSecondsMultiplicator) {
 	DecreaseHealthByFloat(CurrentDeltaSeconds * deltaSecondsMultiplicator);
 }
-
 void ABase_DrivePawn::DecreaseHealthByFloat(float health) {
 	Health -= health;
 
@@ -301,7 +288,6 @@ void ABase_DrivePawn::DecreaseHealthByFloat(float health) {
 		Health = 0;
 	}
 }
-
 void ABase_DrivePawn::UpdateHealth() {
 	if (IsCollidingWithKillPlane) {
 		DecreaseHealthByTime(10);
@@ -316,7 +302,6 @@ void ABase_DrivePawn::UpdateHealth() {
 		HealthSmoke->ActivateSystem();
 	}
 }
-
 void ABase_DrivePawn::DestroyCar() {
 	Destroy();
 }

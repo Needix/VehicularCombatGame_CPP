@@ -12,6 +12,9 @@
 #include "HeadMountedDisplayFunctionLibrary.h"
 #endif // HMD_MODULE_INCLUDED
 
+const FName APlayer_DrivePawn::LookUpBinding("LookUp");
+const FName APlayer_DrivePawn::LookRightBinding("LookRight");
+
 void APlayer_DrivePawn::BeginPlay() {
 	Super::BeginPlay();
 	bool bWantInCar = false;
@@ -20,6 +23,11 @@ void APlayer_DrivePawn::BeginPlay() {
 	bWantInCar = UHeadMountedDisplayFunctionLibrary::IsHeadMountedDisplayEnabled();
 #endif // HMD_MODULE_INCLUDED
 	EnableIncarView(bWantInCar);
+}
+
+void APlayer_DrivePawn::Tick(float DeltaTime) {
+	Super::Tick(DeltaTime);
+	UpdateHMDCamera();
 }
 
 void APlayer_DrivePawn::SetupPlayerInputComponent(class UInputComponent *PlayerInputComponent) {
@@ -54,6 +62,23 @@ void APlayer_DrivePawn::OnHandbrakePressed() {
 
 void APlayer_DrivePawn::OnHandbrakeReleased() {
 	GetVehicleMovementComponent()->SetHandbrakeInput(false);
+}
+
+void APlayer_DrivePawn::UpdateHMDCamera() {
+	bool bHMDActive = false;
+#if HMD_MODULE_INCLUDED
+	if ((GEngine->XRSystem.IsValid() == true) && ((GEngine->XRSystem->IsHeadTrackingAllowed() == true) || (GEngine->IsStereoscopic3D() == true))) {
+		bHMDActive = true;
+	}
+#endif // HMD_MODULE_INCLUDED
+	if (!bHMDActive) {
+		if (InputComponent && bInCarCameraActive) {
+			FRotator HeadRotation = GetInternalCamera()->RelativeRotation;
+			HeadRotation.Pitch += InputComponent->GetAxisValue(LookUpBinding);
+			HeadRotation.Yaw += InputComponent->GetAxisValue(LookRightBinding);
+			GetInternalCamera()->RelativeRotation = HeadRotation;
+		}
+	}
 }
 
 void APlayer_DrivePawn::EnableIncarView(const bool bState) {
