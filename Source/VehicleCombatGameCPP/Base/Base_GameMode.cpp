@@ -84,7 +84,7 @@ void ABase_GameMode::CreateTeams() {
 				FActorSpawnParameters spawnParameters;
 				spawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 				ATeam *team = GetWorld()->SpawnActor<ATeam>(ATeam::StaticClass(), spawnTransform, spawnParameters);
-				team->Setup(FString(TEXT("Team ") + (i + 1)), i, TeamColors[i]);
+				team->Setup(FString(TEXT("Team ") + FString::FromInt(i + 1)), i, TeamColors[i]);
 				Teams.Add(team);
 				break;
 			}
