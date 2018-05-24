@@ -56,7 +56,7 @@ void APlayer_DrivePawn::Tick(float DeltaTime) {
 }
 
 void APlayer_DrivePawn::SetupCameraTransitionTimeline() {
-	static ConstructorHelpers::FObjectFinder<UCurveFloat> Curve(TEXT("/Game/VehicularCombatGame/Curves/CameraTransition.CameraTransition"));
+	static ConstructorHelpers::FObjectFinder<UCurveFloat> Curve(TEXT("/Game/VehicularCombatGame/Curves/Linear.Linear"));
 
 	CameraTransitionTimeline = NewObject<UTimelineComponent>(this, FName("TimelineAnimation"));
 	CameraTransitionTimeline->SetPropertySetObject(this);
