@@ -8,6 +8,9 @@
 #include "UObject/ConstructorHelpers.h"
 #include "Components/AudioComponent.h"
 #include "Components/TextRenderComponent.h"
+#include "Components/TimelineComponent.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Curves/CurveFloat.h"
 
 // Needed for VR Headset
 #if HMD_MODULE_INCLUDED
@@ -24,6 +27,12 @@ APlayer_DrivePawn::APlayer_DrivePawn() {
 	HornSoundComponent->bAutoActivate = false;
 	HornSoundComponent->SetSound(SoundCue.Object);
 	HornSoundComponent->SetupAttachment(GetMesh());
+
+	Cameras.Add(FTransform(FRotator(0, 0, 0), FVector(0, 0, 0), FVector(1, 1, 1)));
+	Cameras.Add(FTransform(FRotator(0, 10, 0), FVector(-193.94, 0, -12.16), FVector(1, 1, 1)));
+	Cameras.Add(FTransform(FRotator(0, 0, 0), FVector(-65.9, 0, 10.42), FVector(1, 1, 1)));
+
+	SetupCameraTransitionTimeline();
 }
 
 void APlayer_DrivePawn::BeginPlay() {
@@ -38,7 +47,30 @@ void APlayer_DrivePawn::BeginPlay() {
 
 void APlayer_DrivePawn::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
+
+	if (IsValid(CameraTransitionTimeline)) {
+		CameraTransitionTimeline->TickComponent(DeltaTime, ELevelTick::LEVELTICK_TimeOnly, NULL);
+	}
+
 	UpdateHMDCamera();
+}
+
+void APlayer_DrivePawn::SetupCameraTransitionTimeline() {
+	static ConstructorHelpers::FObjectFinder<UCurveFloat> Curve(TEXT("/Game/VehicularCombatGame/Curves/CameraTransition.CameraTransition"));
+
+	CameraTransitionTimeline = NewObject<UTimelineComponent>(this, FName("TimelineAnimation"));
+	CameraTransitionTimeline->SetPropertySetObject(this);
+
+	FOnTimelineFloat callback;
+	FOnTimelineEventStatic onFinishedCallback;
+
+	callback.BindUFunction(this, FName{TEXT("CameraTransitionTimelineCallback")});
+	CameraTransitionTimeline->AddInterpFloat(Curve.Object, callback);
+
+	onFinishedCallback.BindUFunction(this, FName{TEXT("CameraTransitionTimelineFinishedCallback")});
+	CameraTransitionTimeline->SetTimelineFinishedFunc(onFinishedCallback);
+
+	CameraTransitionTimeline->RegisterComponent();
 }
 
 void APlayer_DrivePawn::SetupPlayerInputComponent(class UInputComponent *PlayerInputComponent) {
@@ -122,9 +154,31 @@ void APlayer_DrivePawn::OnResetVR() {
 }
 
 void APlayer_DrivePawn::OnToggleCamera() {
-	EnableIncarView(!bInCarCameraActive);
+	int newIndex = CurrentCamera + 1;
+
+	if (newIndex >= Cameras.Num()) {
+		newIndex = 0;
+	}
+
+	CurrentCamera = newIndex;
+
+	OldCameraTransform = GetCamera()->GetRelativeTransform();
+
+	if (IsValid(CameraTransitionTimeline)) {
+		CameraTransitionTimeline->PlayFromStart();
+	}
 }
 
 void APlayer_DrivePawn::OnHorn() {
 	HornSoundComponent->Play();
+}
+
+void APlayer_DrivePawn::CameraTransitionTimelineCallback(float val) {
+	FTransform transform = UKismetMathLibrary::TLerp(OldCameraTransform, Cameras[CurrentCamera], val);
+
+	GetCamera()->SetRelativeLocationAndRotation(transform.GetLocation(), transform.GetRotation());
+}
+
+void APlayer_DrivePawn::CameraTransitionTimelineFinishedCallback() {
+	EnableIncarView(CurrentCamera == 0);
 }
