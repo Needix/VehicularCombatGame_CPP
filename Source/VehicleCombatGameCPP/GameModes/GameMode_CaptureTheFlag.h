@@ -20,9 +20,13 @@ class VEHICLECOMBATGAMECPP_API AGameMode_CaptureTheFlag : public ABase_GameMode
 		ACTF_Flag* TheFlag = nullptr;
 	
 	public:
+		AGameMode_CaptureTheFlag();
+
 		virtual void Tick(float Delta) override;
 
 		void SpawnFlag();
 
 		ACTF_Flag* getFlag() { return TheFlag; }
+
+		UClass* GetAIPawnClass() override;
 };

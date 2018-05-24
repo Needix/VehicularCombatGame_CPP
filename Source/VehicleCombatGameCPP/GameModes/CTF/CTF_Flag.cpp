@@ -55,12 +55,22 @@ void ACTF_Flag::Tick(float DeltaTime) {
 void ACTF_Flag::BoxCollisionComponentOverlap(class AActor* myActor, class AActor* otherActor) {
 	UClass* otherActorClass = otherActor->GetClass();
 	if(otherActorClass->IsChildOf(ABase_DrivePawn::StaticClass())) { // Potential Player pick up
-		if(IsValid(GetOwner())) { // Do not pickup if already picked up
-			return;
+		//if(IsValid(GetOwner())) { // Do not pickup if already picked up
+		//	return;
+		//}
+		EDetachmentRule detachmentRule = EDetachmentRule::KeepWorld;
+		FDetachmentTransformRules detachmentRules = FDetachmentTransformRules(detachmentRule, true);
+		RootComponent->DetachFromComponent(detachmentRules);
+
+		if(IsValid(this->GetParentActor())) {
+			this->GetParentActor()->ResetOwnedComponents();
 		}
 		SetOwner(otherActor);
+
 		ABase_DrivePawn* driver = CastChecked<ABase_DrivePawn>(otherActor);
-		RootComponent->AttachTo(driver->GetRootComponent(), NAME_None, EAttachLocation::SnapToTarget);
+		EAttachmentRule attachmentRule = EAttachmentRule::SnapToTarget;
+		FAttachmentTransformRules attachmentRules = FAttachmentTransformRules(attachmentRule, false);
+		RootComponent->AttachToComponent(driver->GetRootComponent(), attachmentRules);
 	} else if(otherActorClass->IsChildOf(ATeam::StaticClass())) { // Delivered to base?
 		if(!IsValid(GetOwner())) {
 			return;

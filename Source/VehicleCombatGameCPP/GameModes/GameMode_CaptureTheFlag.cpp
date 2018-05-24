@@ -4,11 +4,16 @@
 
 #include "Engine/Engine.h"
 
+#include "AI/AI_CTF_DrivePawn.h"
 #include "GameModes/CTF/CTF_Flag.h"
+
+AGameMode_CaptureTheFlag::AGameMode_CaptureTheFlag() {
+	
+}
 
 void AGameMode_CaptureTheFlag::Tick(float delta) {
 	Super::Tick(delta);
-	if(TheFlag == nullptr) {
+	if(!IsValid(TheFlag)) {
 		SpawnFlag();
 	}
 }
@@ -21,3 +26,6 @@ void AGameMode_CaptureTheFlag::SpawnFlag() {
 	TheFlag = GetWorld()->SpawnActor<ACTF_Flag>(ACTF_Flag::StaticClass(), location, spawnParameters);
 }
 
+UClass* AGameMode_CaptureTheFlag::GetAIPawnClass() {
+	return AAI_CTF_DrivePawn::StaticClass();
+}

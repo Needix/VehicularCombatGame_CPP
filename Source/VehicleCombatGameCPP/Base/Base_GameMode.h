@@ -50,4 +50,6 @@ class VEHICLECOMBATGAMECPP_API ABase_GameMode : public AGameMode {
 	float GetMinY();
 
 	float GetRespawnTime();
+
+	virtual UClass* GetAIPawnClass();
 };

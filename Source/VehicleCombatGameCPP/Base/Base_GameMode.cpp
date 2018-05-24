@@ -91,7 +91,7 @@ void ABase_GameMode::SpawnAIs() {
 	for (ATeam *team : Teams) {
 		TArray<AController *> controllerArray = team->TeamPlayer;
 		for (int i = controllerArray.Num(); i < MaxCarsPerTeam; i++) {
-			ABase_DrivePawn *spawnedCar = team->SpawnCar(NULL, AAI_DrivePawn::StaticClass());
+			ABase_DrivePawn *spawnedCar = team->SpawnCar(NULL, GetAIPawnClass());
 		}
 	}
 }
@@ -126,4 +126,8 @@ float ABase_GameMode::GetMinY() { return UKismetMathLibrary::Min( LevelBoundary1
 
 float ABase_GameMode::GetRespawnTime() {
 	return CONST_DeathRespawnTime;
+}
+
+UClass* ABase_GameMode::GetAIPawnClass() {
+	return AAI_DrivePawn::StaticClass();
 }

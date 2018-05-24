@@ -6,6 +6,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "EngineUtils.h"
+#include "Engine/Engine.h"
 #include "Landscape.h"
 #include "UObject/ConstructorHelpers.h"
 
@@ -101,12 +102,13 @@ void ATeam::HandleAIRespawn(float DeltaTime) {
 	AI_RespawnTimer += DeltaTime;
 
 	ABase_GameMode *gameMode = CastChecked<ABase_GameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+	UClass* aiClass = gameMode->GetAIPawnClass();
 	if (AI_RespawnTimer < gameMode->GetRespawnTime()) {
 		return;
 	}
 
 	if (TeamPlayer.Num() < gameMode->MaxCarsPerTeam) {
-		SpawnCar(NULL, AAI_DrivePawn::StaticClass());
+		SpawnCar(NULL, aiClass);
 		AI_RespawnTimer = 0;
 		return;
 	}
@@ -115,7 +117,7 @@ void ATeam::HandleAIRespawn(float DeltaTime) {
 		AController *controller = TeamPlayer[i];
 
 		if (!IsValid(controller)) {
-			SpawnCar(NULL, AAI_DrivePawn::StaticClass(), i);
+			SpawnCar(NULL, aiClass, i);
 			AI_RespawnTimer = 0;
 			return;
 		}
@@ -174,4 +176,9 @@ ABase_DrivePawn *ATeam::SpawnCar(AController *controller, UClass *driveClass, in
 			UE_LOG(LogTemp, Fatal, TEXT("Base_GameMode: Could not spawn car after %i tries! Aborting..."), tries);
 		}
 	}
+}
+
+void ATeam::IncreasePoints(int amount) {
+	Points += amount;
+	UE_LOG(LogTemp, Warning, TEXT("%s scored %i points. Now at %i points!"), *Name, amount, Points);
 }

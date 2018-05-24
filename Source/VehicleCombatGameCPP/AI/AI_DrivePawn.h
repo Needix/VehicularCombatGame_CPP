@@ -16,8 +16,9 @@ class VEHICLECOMBATGAMECPP_API AAI_DrivePawn : public ABase_DrivePawn {
   public:
 	virtual void Tick(float Delta) override;
 
-  private:
+  protected:
 	class APlayer_DrivePawn *FindClosestPlayer();
-	void SetSteering(APlayer_DrivePawn *closestPlayer);
-	void SetThrottle(APlayer_DrivePawn *closestPlayer);
+	virtual void SetSteering(AActor* actor);
+	void SetSteering(FVector location);
+	virtual void SetThrottle(AActor *actor);
 };

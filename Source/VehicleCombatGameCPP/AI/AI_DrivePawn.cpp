@@ -19,19 +19,21 @@ void AAI_DrivePawn::Tick(float Delta) {
 	}
 }
 
-void AAI_DrivePawn::SetThrottle(APlayer_DrivePawn *closestPlayer) {
+void AAI_DrivePawn::SetThrottle(AActor *closestPlayer) {
 	float distance = closestPlayer->GetDistanceTo(this);
-	float throttle = UKismetMathLibrary::MapRangeClamped(distance, 0, 5000, 0.3, 1);
+	float throttle = UKismetMathLibrary::MapRangeClamped(distance, 0, 5000, 0.7, 1);
 
 	UWheeledVehicleMovementComponent4W *Vehicle4W = CastChecked<UWheeledVehicleMovementComponent4W>(GetVehicleMovement());
 	Vehicle4W->SetThrottleInput(throttle);
 }
 
-void AAI_DrivePawn::SetSteering(APlayer_DrivePawn *closestPlayer) {
-	FVector myLocation = this->GetActorLocation();
-	FVector closestPlayerLocation = closestPlayer->GetActorLocation();
+void AAI_DrivePawn::SetSteering(AActor *player) {
+	FVector closestPlayerLocation = player->GetActorLocation();
+	SetSteering(closestPlayerLocation);
+}
 
-	FRotator rotator = UKismetMathLibrary::FindLookAtRotation(myLocation, closestPlayerLocation);
+void AAI_DrivePawn::SetSteering(FVector location) {
+	FRotator rotator = UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), location);
 	FRotator myRotator = this->GetActorRotation();
 	FRotator baseRotator = UKismetMathLibrary::NormalizedDeltaRotator(rotator, myRotator);
 	float yaw = baseRotator.Yaw;
@@ -40,6 +42,7 @@ void AAI_DrivePawn::SetSteering(APlayer_DrivePawn *closestPlayer) {
 	UWheeledVehicleMovementComponent4W *Vehicle4W = CastChecked<UWheeledVehicleMovementComponent4W>(GetVehicleMovement());
 	Vehicle4W->SetSteeringInput(steering);
 }
+
 
 APlayer_DrivePawn *AAI_DrivePawn::FindClosestPlayer() {
 	APlayer_DrivePawn *closest = NULL;
