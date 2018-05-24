@@ -47,7 +47,7 @@ void APlayer_DrivePawn::BeginPlay() {
 void APlayer_DrivePawn::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 
-	if (CameraTransitionTimeline != NULL) {
+	if (IsValid(CameraTransitionTimeline)) {
 		CameraTransitionTimeline->TickComponent(DeltaTime, ELevelTick::LEVELTICK_TimeOnly, NULL);
 	}
 
@@ -163,7 +163,9 @@ void APlayer_DrivePawn::OnToggleCamera() {
 
 	OldCameraTransform = GetCamera()->GetRelativeTransform();
 
-	CameraTransitionTimeline->PlayFromStart();
+	if (IsValid(CameraTransitionTimeline)) {
+		CameraTransitionTimeline->PlayFromStart();
+	}
 }
 
 void APlayer_DrivePawn::OnHorn() {
