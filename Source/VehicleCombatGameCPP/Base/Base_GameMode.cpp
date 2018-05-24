@@ -35,8 +35,8 @@ ABase_GameMode::ABase_GameMode() {
 	TeamColors.Add(FVector(0,	0,		0));
 	TeamColors.Add(FVector(255,	255,	255));
 
-	/*static ConstructorHelpers::FObjectFinder<USoundCue> backgroundMusicObject(TEXT("/Game/VehicularCombatGame/Sound/BackgroundMusic_Cue.BackgroundMusic_Cue"));
-	UGameplayStatics::PlaySound2D(GetWorld(), backgroundMusicObject.Object);*/
+	static ConstructorHelpers::FObjectFinder<USoundCue> backgroundMusicObject(TEXT("/Game/VehicularCombatGame/Sound/BackgroundMusic_Cue.BackgroundMusic_Cue"));
+	UGameplayStatics::PlaySound2D(GetWorld(), backgroundMusicObject.Object);
 }
 
 void ABase_GameMode::BeginPlay() {
