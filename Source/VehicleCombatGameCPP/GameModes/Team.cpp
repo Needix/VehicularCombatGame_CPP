@@ -11,6 +11,7 @@
 
 // Component Header
 #include "Particles/ParticleSystemComponent.h"
+#include "Components/BoxComponent.h"
 
 // Custom Header
 #include "AI/AI_DrivePawn.h"
@@ -31,6 +32,9 @@ ATeam::ATeam() {
 	baseParticleSystemComponent->Template = baseParticleSystem.Object;
 	baseParticleSystemComponent->SetupAttachment(RootComponent);
 	
+	UBoxComponent* collisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollision"));
+	collisionBox->SetRelativeScale3D(FVector(30, 30, 10));
+	collisionBox->SetupAttachment(RootComponent);
 }
 
 void ATeam::Setup(FString pName, int pId, FVector pColor) {
@@ -152,6 +156,7 @@ ABase_DrivePawn *ATeam::SpawnCar(AController *controller, UClass *driveClass, in
 					APlayer_Controller *playerController = CastChecked<APlayer_Controller>(controller);
 					playerController->Team = this;
 				}
+				result->Team = this;
 
 				if (controllerIndex < 0) {
 					TeamPlayer.Add(controller);

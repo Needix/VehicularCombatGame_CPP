@@ -43,5 +43,11 @@ class VEHICLECOMBATGAMECPP_API ABase_GameMode : public AGameMode {
 	void Tick(float Delta) override;
 	void BeginPlay() override;
 
+	FVector GetRandomTerrainLocation();
+	float GetMaxX();
+	float GetMaxY();
+	float GetMinX();
+	float GetMinY();
+
 	float GetRespawnTime();
 };

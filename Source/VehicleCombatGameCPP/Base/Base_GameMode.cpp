@@ -35,8 +35,8 @@ ABase_GameMode::ABase_GameMode() {
 	TeamColors.Add(FVector(0,	0,		0));
 	TeamColors.Add(FVector(255,	255,	255));
 
-	static ConstructorHelpers::FObjectFinder<USoundCue> backgroundMusicObject(TEXT("/Game/VehicularCombatGame/Sound/BackgroundMusic_Cue.BackgroundMusic_Cue"));
-	UGameplayStatics::PlaySound2D(GetWorld(), backgroundMusicObject.Object);
+	/*static ConstructorHelpers::FObjectFinder<USoundCue> backgroundMusicObject(TEXT("/Game/VehicularCombatGame/Sound/BackgroundMusic_Cue.BackgroundMusic_Cue"));
+	UGameplayStatics::PlaySound2D(GetWorld(), backgroundMusicObject.Object);*/
 }
 
 void ABase_GameMode::BeginPlay() {
@@ -70,41 +70,15 @@ void ABase_GameMode::FindLevelBoundaries() {
 
 void ABase_GameMode::CreateTeams() {
 	for (int i = 0; i < MaxTeams; i++) {
-		int tries = 0;
-		while (true) {
-			float x1 = LevelBoundary1.X;
-			float x2 = LevelBoundary2.X;
-			float y1 = LevelBoundary1.Y;
-			float y2 = LevelBoundary2.Y;
-			float locX = UKismetMathLibrary::RandomFloatInRange(UKismetMathLibrary::Min(x1, x2), UKismetMathLibrary::Max(x1, x2));
-			float locY = UKismetMathLibrary::RandomFloatInRange(UKismetMathLibrary::Min(y1, y2), UKismetMathLibrary::Max(y1, y2));
+		FVector location = GetRandomTerrainLocation();
+		location.Z = location.Z + 100;
 
-			FVector lineTraceStart = FVector(locX, locY, GeneralHelper::LandscapeZStart);
-			FVector lineTraceEnd = FVector(locX, locY, GeneralHelper::LandscapeZEnd);
-
-			FHitResult outHit;
-			TArray<AActor *> actorsToIgnore;
-			TArray<TEnumAsByte<EObjectTypeQuery>> objectTypes;
-			objectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldStatic));
-			bool traceSuccess = UKismetSystemLibrary::LineTraceSingleForObjects(GetWorld(), lineTraceStart, lineTraceEnd, objectTypes, false, actorsToIgnore, EDrawDebugTrace::None, outHit, true);
-
-			if (traceSuccess && outHit.Actor->GetClass()->IsChildOf(ALandscape::StaticClass())) {
-				outHit.Location.Z = outHit.Location.Z + 100;
-				FTransform spawnTransform = FTransform(outHit.Location);
-				FActorSpawnParameters spawnParameters;
-				spawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-				ATeam *team = GetWorld()->SpawnActor<ATeam>(ATeam::StaticClass(), spawnTransform, spawnParameters);
-				team->Setup(FString(TEXT("Team ") + FString::FromInt(i + 1)), i, TeamColors[i]);
-				Teams.Add(team);
-				break;
-			}
-			tries++;
-			if (tries == 20) {
-				UE_LOG(LogTemp, Warning, TEXT("Base_GameMode: Currently at %i tries to create teams! Trying 10 more tries..."), tries);
-			} else if (tries == 30) {
-				UE_LOG(LogTemp, Fatal, TEXT("Base_GameMode: Could not spawn teams after %i tries! Aborting..."), tries);
-			}
-		}
+		FTransform spawnTransform = FTransform(location);
+		FActorSpawnParameters spawnParameters;
+		spawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		ATeam *team = GetWorld()->SpawnActor<ATeam>(ATeam::StaticClass(), spawnTransform, spawnParameters);
+		team->Setup(FString(TEXT("Team ") + FString::FromInt(i + 1)), i, TeamColors[i]);
+		Teams.Add(team);
 	}
 }
 
@@ -121,6 +95,34 @@ void ABase_GameMode::SpawnAIs() {
 		}
 	}
 }
+
+FVector ABase_GameMode::GetRandomTerrainLocation() {
+	for(int i = 0; true; i++) {
+		float locX = UKismetMathLibrary::RandomFloatInRange(GetMinX(), GetMaxX());
+		float locY = UKismetMathLibrary::RandomFloatInRange(GetMinY(), GetMaxY());
+		FVector lineTraceStart = FVector(locX, locY, GeneralHelper::LandscapeZStart);
+		FVector lineTraceEnd = FVector(locX, locY, GeneralHelper::LandscapeZEnd);
+
+		FHitResult outHit;
+		TArray<AActor *> actorsToIgnore;
+		TArray<TEnumAsByte<EObjectTypeQuery>> objectTypes;
+		objectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldStatic));
+		bool traceSuccess = UKismetSystemLibrary::LineTraceSingleForObjects(GetWorld(), lineTraceStart, lineTraceEnd, objectTypes, false, actorsToIgnore, EDrawDebugTrace::None, outHit, true);
+
+		if (traceSuccess && outHit.Actor->GetClass()->IsChildOf(ALandscape::StaticClass())) {
+			return outHit.Location;
+		}
+		if (i == 70) {
+			UE_LOG(LogTemp, Warning, TEXT("Base_GameMode: Currently at %i tries to create teams! Trying 10 more tries..."), i);
+		} else if (i == 100) {
+			UE_LOG(LogTemp, Fatal, TEXT("Base_GameMode: Could not spawn teams after %i tries! Aborting..."), i);
+		}
+	}
+}
+float ABase_GameMode::GetMaxX() { return UKismetMathLibrary::Max( LevelBoundary1.X, LevelBoundary2.X); }
+float ABase_GameMode::GetMinX() { return UKismetMathLibrary::Min( LevelBoundary1.X, LevelBoundary2.X); }
+float ABase_GameMode::GetMaxY() { return UKismetMathLibrary::Max( LevelBoundary1.Y, LevelBoundary2.Y); }
+float ABase_GameMode::GetMinY() { return UKismetMathLibrary::Min( LevelBoundary1.Y, LevelBoundary2.Y); }
 
 float ABase_GameMode::GetRespawnTime() {
 	return CONST_DeathRespawnTime;

@@ -22,9 +22,11 @@ class VEHICLECOMBATGAMECPP_API ATeam : public AActor {
   private:
 	float DeltaSeconds;
 	float AI_RespawnTimer;
+
 	FString Name;
 	int Id;
 	FVector Color;
+	int points;
 
 	UParticleSystemComponent* baseParticleSystemComponent;
 
@@ -48,6 +50,9 @@ class VEHICLECOMBATGAMECPP_API ATeam : public AActor {
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	
+	void IncreasePoints(int amount) { points += amount; }
+	void DecreasePoints(int amount) { points -= amount; }
 
 	ABase_DrivePawn *SpawnCar(AController *controller, UClass *driveClass);
 	ABase_DrivePawn *SpawnCar(AController *controller, UClass *driveClass, int controllerIndex);

@@ -25,6 +25,7 @@
 #include "VehicleCombatGameCPPHud.h"
 #include "AllLevel/KillPlane.h"
 #include "Helper/GeneralHelper.h"
+#include "GameModes/Team.h"
 
 // Needed for VR Headset
 #if HMD_MODULE_INCLUDED

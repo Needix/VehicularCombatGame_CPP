@@ -74,9 +74,20 @@ class ABase_DrivePawn : public AWheeledVehicle {
 	bool bInReverseGear;
 
 	FVector InternalCameraOrigin;
-	
-  protected:
-	virtual void BeginPlay() override;
+
+	class ATeam* Team;
+
+  private:
+	// Update physics. Slippery = car on the roof (slide); NonSlippery = Normal driving
+	bool bIsLowFriction;
+	UPhysicalMaterial *SlipperyMaterial;
+	UPhysicalMaterial *NonSlipperyMaterial;
+
+	// Health
+	float Health = 100;
+	bool IsCollidingWithKillPlane;
+
+	float CurrentDeltaSeconds;
 
   public:
 	virtual void Tick(float Delta) override;
@@ -88,8 +99,12 @@ class ABase_DrivePawn : public AWheeledVehicle {
 
 	static const FName EngineAudioRPM;
 
+  protected:
+	virtual void BeginPlay() override;
+
   private:
-	float CurrentDeltaSeconds;
+	// Camera/HUD
+	void EnableIncarView(const bool bState);
 
 	/*UFUNCTION()
 	void ActorBeginOverlap1(class AActor* actor, class AActor* otherActor);*/
@@ -113,18 +128,6 @@ class ABase_DrivePawn : public AWheeledVehicle {
 	void UpdateInCarHUD();
 	void UpdateHUDStrings();
 	void UpdateSound();
-	
-	// Camera/HUD
-	void EnableIncarView(const bool bState);
-
-	// Update physics. Slippery = car on the roof (slide); NonSlippery = Normal driving
-	bool bIsLowFriction;
-	UPhysicalMaterial *SlipperyMaterial;
-	UPhysicalMaterial *NonSlipperyMaterial;
-
-	// Health
-	float Health = 100;
-	bool IsCollidingWithKillPlane;
 
   public:
     // Car Component Getter
