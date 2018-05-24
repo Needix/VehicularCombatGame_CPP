@@ -31,21 +31,7 @@ APlayer_DrivePawn::APlayer_DrivePawn() {
 	Cameras.Add(FTransform(FRotator(0, 10, 0), FVector(-193.94, 0, -12.16), FVector(1, 1, 1)));
 	Cameras.Add(FTransform(FRotator(0, 0, 0), FVector(-65.9, 0, 10.42), FVector(1, 1, 1)));
 
-	static ConstructorHelpers::FObjectFinder<UCurveFloat> Curve(TEXT("/Game/VehicularCombatGame/Curves/CameraTransition.CameraTransition"));
-
-	CameraTransitionTimeline = NewObject<UTimelineComponent>(this, FName("TimelineAnimation"));
-	CameraTransitionTimeline->SetPropertySetObject(this);
-
-	FOnTimelineFloat onTimelineCallback;
-	FOnTimelineEventStatic onTimelineFinishedCallback;
-
-	onTimelineCallback.BindUFunction(this, FName{TEXT("CameraTransitionTimelineCallback")});
-	CameraTransitionTimeline->AddInterpFloat(Curve.Object, onTimelineCallback);
-
-	onTimelineFinishedCallback.BindUFunction(this, FName{TEXT("CameraTransitionTimelineFinishedCallback")});
-	CameraTransitionTimeline->SetTimelineFinishedFunc(onTimelineFinishedCallback);
-
-	CameraTransitionTimeline->RegisterComponent();
+	SetupCameraTransitionTimeline();
 }
 
 void APlayer_DrivePawn::BeginPlay() {
@@ -66,6 +52,24 @@ void APlayer_DrivePawn::Tick(float DeltaTime) {
 	}
 
 	UpdateHMDCamera();
+}
+
+void APlayer_DrivePawn::SetupCameraTransitionTimeline() {
+	static ConstructorHelpers::FObjectFinder<UCurveFloat> Curve(TEXT("/Game/VehicularCombatGame/Curves/CameraTransition.CameraTransition"));
+
+	CameraTransitionTimeline = NewObject<UTimelineComponent>(this, FName("TimelineAnimation"));
+	CameraTransitionTimeline->SetPropertySetObject(this);
+
+	FOnTimelineFloat callback;
+	FOnTimelineEventStatic onFinishedCallback;
+
+	callback.BindUFunction(this, FName{TEXT("CameraTransitionTimelineCallback")});
+	CameraTransitionTimeline->AddInterpFloat(Curve.Object, callback);
+
+	onFinishedCallback.BindUFunction(this, FName{TEXT("CameraTransitionTimelineFinishedCallback")});
+	CameraTransitionTimeline->SetTimelineFinishedFunc(onFinishedCallback);
+
+	CameraTransitionTimeline->RegisterComponent();
 }
 
 void APlayer_DrivePawn::SetupPlayerInputComponent(class UInputComponent *PlayerInputComponent) {

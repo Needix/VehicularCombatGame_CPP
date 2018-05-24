@@ -43,6 +43,7 @@ class VEHICLECOMBATGAMECPP_API APlayer_DrivePawn : public ABase_DrivePawn {
 	virtual void SetupPlayerInputComponent(UInputComponent *InputComponent) override;
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
+	void SetupCameraTransitionTimeline();
 	void UpdateHMDCamera();
 
 	static const FName LookUpBinding;
