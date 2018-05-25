@@ -76,15 +76,15 @@ void ABase_DrivePawn::InitializeEventDelegates() {
 	GetMesh()->bGenerateOverlapEvents = true;
 
 	FScriptDelegate overlapDelegate1;
-    overlapDelegate1.BindUFunction(this, "HandleOverlapStartEvent");
+	overlapDelegate1.BindUFunction(this, "HandleOverlapStartEvent");
 	OnActorBeginOverlap.AddUnique(overlapDelegate1);
 
 	FScriptDelegate overlapDelegate2;
-    overlapDelegate2.BindUFunction(this, "HandleOverlapEndEvent");
+	overlapDelegate2.BindUFunction(this, "HandleOverlapEndEvent");
 	OnActorEndOverlap.AddUnique(overlapDelegate2);
 
 	FScriptDelegate hitDelegate;
-    hitDelegate.BindUFunction(this, "HandleHitEvent");
+	hitDelegate.BindUFunction(this, "HandleHitEvent");
 	GetMesh()->OnComponentHit.AddUnique(hitDelegate);
 }
 void ABase_DrivePawn::InitializeBasicComponents() {
@@ -300,21 +300,21 @@ void ABase_DrivePawn::UpdatePhysicsMaterial() {
 	}
 }
 
-void ABase_DrivePawn::HandleOverlapStartEvent(class AActor* myActor, class AActor* otherActor) {
-	if(otherActor->GetClass()->IsChildOf(AKillPlane::StaticClass())) {
-		AKillPlane* killPlane = CastChecked<AKillPlane>(otherActor);
+void ABase_DrivePawn::HandleOverlapStartEvent(class AActor *myActor, class AActor *otherActor) {
+	if (otherActor->GetClass()->IsChildOf(AKillPlane::StaticClass())) {
+		AKillPlane *killPlane = CastChecked<AKillPlane>(otherActor);
 		IsCollidingWithKillPlane = true;
 	}
 }
-void ABase_DrivePawn::HandleOverlapEndEvent(class AActor* myActor, class AActor* otherActor) {
-	if(otherActor->GetClass()->IsChildOf(AKillPlane::StaticClass())) {
-		AKillPlane* killPlane = CastChecked<AKillPlane>(otherActor);
+void ABase_DrivePawn::HandleOverlapEndEvent(class AActor *myActor, class AActor *otherActor) {
+	if (otherActor->GetClass()->IsChildOf(AKillPlane::StaticClass())) {
+		AKillPlane *killPlane = CastChecked<AKillPlane>(otherActor);
 		IsCollidingWithKillPlane = killPlane->GetActorLocation().Z > this->GetActorLocation().Z;
 	}
 }
 
-void ABase_DrivePawn::HandleHitEvent(UPrimitiveComponent* hitComponent, AActor* otherActor, UPrimitiveComponent* otherComponent, FVector normalImpulse, FHitResult& hit) {
-	if(otherActor->GetClass()->IsChildOf(ABase_DrivePawn::StaticClass())) {
+void ABase_DrivePawn::HandleHitEvent(UPrimitiveComponent *hitComponent, AActor *otherActor, UPrimitiveComponent *otherComponent, FVector normalImpulse, FHitResult &hit) {
+	if (otherActor->GetClass()->IsChildOf(ABase_DrivePawn::StaticClass())) {
 		DecreaseHealthByFloat(normalImpulse.Size() * GeneralHelper::CarCollisionForceMultiplier);
 	}
 }
