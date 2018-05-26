@@ -33,7 +33,7 @@ APlayer_DrivePawn::APlayer_DrivePawn() {
 	Cameras.Add(FTransform(FRotator(0, 10, 0), FVector(-193.94, 0, -12.16), FVector(1, 1, 1)));
 	Cameras.Add(FTransform(FRotator(0, 0, 0), FVector(-65.9, 0, 10.42), FVector(1, 1, 1)));
 
-	//SetupCameraTransitionTimeline();
+	SetupCameraTransitionTimeline();
 }
 
 void APlayer_DrivePawn::BeginPlay() {
