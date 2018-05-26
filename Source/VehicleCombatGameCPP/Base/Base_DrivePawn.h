@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "WheeledVehicle.h"
+#include "Components/TimelineComponent.h"
 #include "Base_DrivePawn.generated.h"
 
 class UPhysicalMaterial;
@@ -73,6 +74,15 @@ class ABase_DrivePawn : public AWheeledVehicle {
 	UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadOnly)
 	bool bInReverseGear;
 
+	UPROPERTY()
+	UTimelineComponent *FlipCarTimeline;
+
+	UFUNCTION()
+	void FlipCarTimelineCallback(float val);
+
+	UFUNCTION()
+	void FlipCarTimelineFinishedCallback();
+
 	FVector InternalCameraOrigin;
 
 	class ATeam* Team;
@@ -88,6 +98,9 @@ class ABase_DrivePawn : public AWheeledVehicle {
 	bool IsCollidingWithKillPlane;
 
 	float CurrentDeltaSeconds;
+
+	FRotator OldFlipCarRotation;
+	bool WhileFlipping;
 
   public:
 	virtual void Tick(float Delta) override;
@@ -121,6 +134,7 @@ class ABase_DrivePawn : public AWheeledVehicle {
 	void InitializeCar();
 	void InitializeParticleSystems();
 	void InitializeOtherComponents();
+	void InitializeFlipCarTimeline();
 
 	// These functions get called every frame and are used to update stuff
 	void UpdateHealth();
@@ -128,6 +142,7 @@ class ABase_DrivePawn : public AWheeledVehicle {
 	void UpdateInCarHUD();
 	void UpdateHUDStrings();
 	void UpdateSound();
+	void FlipCar();
 
   public:
     // Car Component Getter

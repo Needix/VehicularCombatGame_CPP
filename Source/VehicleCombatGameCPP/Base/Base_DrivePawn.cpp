@@ -15,9 +15,12 @@
 #include "Components/InputComponent.h"
 #include "Components/TextRenderComponent.h"
 #include "Components/AudioComponent.h"
+#include "Components/TimelineComponent.h"
 #include "WheeledVehicleMovementComponent4W.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Curves/CurveFloat.h"
+#include "Kismet/KismetMathLibrary.h"
 
 // Custom Header
 #include "VehicleCombatGameCPPWheelFront.h"
@@ -46,11 +49,12 @@ ABase_DrivePawn::ABase_DrivePawn() {
 
 	static ConstructorHelpers::FObjectFinder<UPhysicalMaterial> NonSlipperyMat(TEXT("/Game/VehicleAdv/PhysicsMaterials/NonSlippery.NonSlippery"));
 	NonSlipperyMaterial = NonSlipperyMat.Object;
-	
+
 	InitializeEventDelegates();
 	InitializeCar();
 	InitializeOtherComponents();
 	InitializeParticleSystems();
+	InitializeFlipCarTimeline();
 
 	// Colors for the in-car gear display. One for normal one for reverse
 	GearDisplayReverseColor = FColor(255, 0, 0, 255);
@@ -76,15 +80,15 @@ void ABase_DrivePawn::InitializeEventDelegates() {
 	GetMesh()->bGenerateOverlapEvents = true;
 
 	FScriptDelegate overlapDelegate1;
-    overlapDelegate1.BindUFunction(this, "HandleOverlapStartEvent");
+	overlapDelegate1.BindUFunction(this, "HandleOverlapStartEvent");
 	OnActorBeginOverlap.AddUnique(overlapDelegate1);
 
 	FScriptDelegate overlapDelegate2;
-    overlapDelegate2.BindUFunction(this, "HandleOverlapEndEvent");
+	overlapDelegate2.BindUFunction(this, "HandleOverlapEndEvent");
 	OnActorEndOverlap.AddUnique(overlapDelegate2);
 
 	FScriptDelegate hitDelegate;
-    hitDelegate.BindUFunction(this, "HandleHitEvent");
+	hitDelegate.BindUFunction(this, "HandleHitEvent");
 	GetMesh()->OnComponentHit.AddUnique(hitDelegate);
 }
 void ABase_DrivePawn::InitializeBasicComponents() {
@@ -243,6 +247,24 @@ void ABase_DrivePawn::InitializeOtherComponents() {
 	EngineSoundComponent->SetupAttachment(GetMesh());
 }
 
+void ABase_DrivePawn::InitializeFlipCarTimeline() {
+	static ConstructorHelpers::FObjectFinder<UCurveFloat> Curve(TEXT("/Game/VehicularCombatGame/Curves/Linear.Linear"));
+
+	FlipCarTimeline = NewObject<UTimelineComponent>(this, FName("FlipCarTimeline"));
+	FlipCarTimeline->SetPropertySetObject(this);
+
+	FOnTimelineFloat callback;
+	FOnTimelineEventStatic onFinishedCallback;
+
+	callback.BindUFunction(this, FName{TEXT("FlipCarTimelineCallback")});
+	FlipCarTimeline->AddInterpFloat(Curve.Object, callback);
+
+	onFinishedCallback.BindUFunction(this, FName{TEXT("FlipCarTimelineFinishedCallback")});
+	FlipCarTimeline->SetTimelineFinishedFunc(onFinishedCallback);
+
+	FlipCarTimeline->RegisterComponent();
+}
+
 void ABase_DrivePawn::Tick(float Delta) {
 	Super::Tick(Delta);
 
@@ -254,6 +276,7 @@ void ABase_DrivePawn::Tick(float Delta) {
 	UpdateHUDStrings();
 	UpdateInCarHUD();
 	UpdateSound();
+	FlipCar();
 }
 void ABase_DrivePawn::UpdateSound() {
 	// Pass the engine RPM to the sound component
@@ -300,21 +323,21 @@ void ABase_DrivePawn::UpdatePhysicsMaterial() {
 	}
 }
 
-void ABase_DrivePawn::HandleOverlapStartEvent(class AActor* myActor, class AActor* otherActor) {
-	if(otherActor->GetClass()->IsChildOf(AKillPlane::StaticClass())) {
-		AKillPlane* killPlane = CastChecked<AKillPlane>(otherActor);
+void ABase_DrivePawn::HandleOverlapStartEvent(class AActor *myActor, class AActor *otherActor) {
+	if (otherActor->GetClass()->IsChildOf(AKillPlane::StaticClass())) {
+		AKillPlane *killPlane = CastChecked<AKillPlane>(otherActor);
 		IsCollidingWithKillPlane = true;
 	}
 }
-void ABase_DrivePawn::HandleOverlapEndEvent(class AActor* myActor, class AActor* otherActor) {
-	if(otherActor->GetClass()->IsChildOf(AKillPlane::StaticClass())) {
-		AKillPlane* killPlane = CastChecked<AKillPlane>(otherActor);
+void ABase_DrivePawn::HandleOverlapEndEvent(class AActor *myActor, class AActor *otherActor) {
+	if (otherActor->GetClass()->IsChildOf(AKillPlane::StaticClass())) {
+		AKillPlane *killPlane = CastChecked<AKillPlane>(otherActor);
 		IsCollidingWithKillPlane = killPlane->GetActorLocation().Z > this->GetActorLocation().Z;
 	}
 }
 
-void ABase_DrivePawn::HandleHitEvent(UPrimitiveComponent* hitComponent, AActor* otherActor, UPrimitiveComponent* otherComponent, FVector normalImpulse, FHitResult& hit) {
-	if(otherActor->GetClass()->IsChildOf(ABase_DrivePawn::StaticClass())) {
+void ABase_DrivePawn::HandleHitEvent(UPrimitiveComponent *hitComponent, AActor *otherActor, UPrimitiveComponent *otherComponent, FVector normalImpulse, FHitResult &hit) {
+	if (otherActor->GetClass()->IsChildOf(ABase_DrivePawn::StaticClass())) {
 		DecreaseHealthByFloat(normalImpulse.Size() * GeneralHelper::CarCollisionForceMultiplier);
 	}
 }
@@ -345,6 +368,43 @@ void ABase_DrivePawn::UpdateHealth() {
 }
 void ABase_DrivePawn::DestroyCar() {
 	Destroy();
+}
+
+void ABase_DrivePawn::FlipCar() {
+	if (WhileFlipping) {
+		return;
+	}
+
+	if (FMath::Abs(GetVehicleMovement()->GetForwardSpeed()) > 0.4) {
+		return;
+	}
+
+	if (FMath::Abs(GetRootComponent()->GetComponentRotation().Roll) < 120) {
+		return;
+	}
+
+	WhileFlipping = true;
+
+	GetMesh()->SetSimulatePhysics(false);
+
+	OldFlipCarRotation = GetTransform().Rotator();
+
+	FlipCarTimeline->PlayFromStart();
+}
+
+void ABase_DrivePawn::FlipCarTimelineCallback(float val) {
+	FRotator rotation = OldFlipCarRotation;
+
+	rotation.Pitch = UKismetMathLibrary::MapRangeClamped(val, 0, 1, rotation.Pitch, 0);
+	rotation.Roll = UKismetMathLibrary::MapRangeClamped(val, 0, 1, rotation.Roll, 0);
+
+	SetActorRotation(rotation, ETeleportType::TeleportPhysics);
+}
+
+void ABase_DrivePawn::FlipCarTimelineFinishedCallback() {
+	GetMesh()->SetSimulatePhysics(true);
+
+	WhileFlipping = false;
 }
 
 #undef LOCTEXT_NAMESPACE
