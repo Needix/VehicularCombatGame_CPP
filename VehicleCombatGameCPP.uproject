@@ -11,7 +11,8 @@
 			"AdditionalDependencies": [
 				"AIModule",
 				"PhysXVehicles",
-				"Engine"
+				"Engine",
+				"UMG"
 			]
 		}
 	],

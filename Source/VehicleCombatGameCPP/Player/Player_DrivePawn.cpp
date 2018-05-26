@@ -22,6 +22,7 @@ const FName APlayer_DrivePawn::LookUpBinding("LookUp");
 const FName APlayer_DrivePawn::LookRightBinding("LookRight");
 
 APlayer_DrivePawn::APlayer_DrivePawn() {
+	//Super::Super();
 	static ConstructorHelpers::FObjectFinder<USoundCue> SoundCue(TEXT("/Game/VehicularCombatGame/Sound/Horn.Horn"));
 	HornSoundComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("HornSound"));
 	HornSoundComponent->bAutoActivate = false;
@@ -32,7 +33,7 @@ APlayer_DrivePawn::APlayer_DrivePawn() {
 	Cameras.Add(FTransform(FRotator(0, 10, 0), FVector(-193.94, 0, -12.16), FVector(1, 1, 1)));
 	Cameras.Add(FTransform(FRotator(0, 0, 0), FVector(-65.9, 0, 10.42), FVector(1, 1, 1)));
 
-	SetupCameraTransitionTimeline();
+	//SetupCameraTransitionTimeline();
 }
 
 void APlayer_DrivePawn::BeginPlay() {

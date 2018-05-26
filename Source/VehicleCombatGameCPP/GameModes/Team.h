@@ -56,4 +56,9 @@ class VEHICLECOMBATGAMECPP_API ATeam : public AActor {
 
 	ABase_DrivePawn *SpawnCar(AController *controller, UClass *driveClass);
 	ABase_DrivePawn *SpawnCar(AController *controller, UClass *driveClass, int controllerIndex);
+	
+	UFUNCTION(BlueprintCallable, Category = Getter)
+	FString GetName() { return Name; }
+	UFUNCTION(BlueprintCallable, Category = Getter)
+	int GetPoints() { return Points; }
 };

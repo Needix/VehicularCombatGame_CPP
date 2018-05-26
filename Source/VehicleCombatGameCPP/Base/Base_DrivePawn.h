@@ -137,4 +137,7 @@ class ABase_DrivePawn : public AWheeledVehicle {
 	FORCEINLINE UTextRenderComponent *GetInCarSpeed() const { return InCarSpeed; }
 	FORCEINLINE UTextRenderComponent *GetInCarGear() const { return InCarGear; }
 	FORCEINLINE UAudioComponent *GetEngineSoundComponent() const { return EngineSoundComponent; }
+
+	UFUNCTION(BlueprintCallable)
+	float GetHealth() { return Health; }
 };

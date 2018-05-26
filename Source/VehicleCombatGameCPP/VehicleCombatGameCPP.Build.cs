@@ -8,13 +8,17 @@ public class VehicleCombatGameCPP : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "PhysXVehicles", "HeadMountedDisplay" });
+        MinFilesUsingPrecompiledHeaderOverride = 1;
+        bFasterWithoutUnity = true;
+
+        PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "PhysXVehicles", "HeadMountedDisplay" });
 
         PublicDependencyModuleNames.AddRange(new string[] {
              "OnlineSubsystem",
              "OnlineSubsystemUtils",
              "Landscape",
-             "Steamworks"
+             "Steamworks",
+             "UMG", "Slate", "SlateCore"
          });
 
         PublicDefinitions.Add("HMD_MODULE_INCLUDED=1");
