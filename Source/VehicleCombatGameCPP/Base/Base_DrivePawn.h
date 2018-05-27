@@ -54,8 +54,7 @@ class ABase_DrivePawn : public AWheeledVehicle {
 
   public:
 	ABase_DrivePawn();
-	
-	
+
 	UPROPERTY(Category = Display, VisibleDefaultsOnly, BlueprintReadOnly)
 	FText SpeedDisplayString;
 
@@ -85,7 +84,7 @@ class ABase_DrivePawn : public AWheeledVehicle {
 
 	FVector InternalCameraOrigin;
 
-	class ATeam* Team;
+	class ATeam *Team;
 
   private:
 	// Update physics. Slippery = car on the roof (slide); NonSlippery = Normal driving
@@ -100,7 +99,7 @@ class ABase_DrivePawn : public AWheeledVehicle {
 	USoundCue *ExplosionSoundCue;
 
 	// Mesh Color
-	UMaterialInstanceDynamic* SkeletonMeshMaterialInstance;
+	UMaterialInstanceDynamic *SkeletonMeshMaterialInstance;
 
 	// Health
 	float Health = 100;
@@ -134,11 +133,11 @@ class ABase_DrivePawn : public AWheeledVehicle {
 	/*UFUNCTION()
 	void ActorBeginOverlap1(class AActor* actor, class AActor* otherActor);*/
 	UFUNCTION()
-	void HandleOverlapStartEvent(class AActor* myActor, class AActor* otherActor);
+	void HandleOverlapStartEvent(class AActor *myActor, class AActor *otherActor);
 	UFUNCTION()
-	void HandleOverlapEndEvent(class AActor* myActor, class AActor* otherActor);
+	void HandleOverlapEndEvent(class AActor *myActor, class AActor *otherActor);
 	UFUNCTION()
-	void HandleHitEvent(UPrimitiveComponent* hitComponent, AActor* actor, UPrimitiveComponent* otherComponent, FVector normalImpulse, FHitResult& hit);
+	void HandleHitEvent(UPrimitiveComponent *hitComponent, AActor *actor, UPrimitiveComponent *otherComponent, FVector normalImpulse, FHitResult &hit);
 
 	// Used to initialize the car at spawn. Called only once at "BeginPlay"
 	void InitializeEventDelegates();
@@ -158,14 +157,28 @@ class ABase_DrivePawn : public AWheeledVehicle {
 	void FlipCar();
 
   public:
-    // Car Component Getter
-	FORCEINLINE USpringArmComponent *GetSpringArm() const { return SpringArm; }
-	FORCEINLINE UCameraComponent *GetCamera() const { return Camera; }
-	FORCEINLINE UCameraComponent *GetInternalCamera() const { return InternalCamera; }
-	FORCEINLINE UTextRenderComponent *GetInCarSpeed() const { return InCarSpeed; }
-	FORCEINLINE UTextRenderComponent *GetInCarGear() const { return InCarGear; }
-	FORCEINLINE UAudioComponent *GetEngineSoundComponent() const { return EngineSoundComponent; }
+	// Car Component Getter
+	FORCEINLINE USpringArmComponent *GetSpringArm() const {
+		return SpringArm;
+	}
+	FORCEINLINE UCameraComponent *GetCamera() const {
+		return Camera;
+	}
+	FORCEINLINE UCameraComponent *GetInternalCamera() const {
+		return InternalCamera;
+	}
+	FORCEINLINE UTextRenderComponent *GetInCarSpeed() const {
+		return InCarSpeed;
+	}
+	FORCEINLINE UTextRenderComponent *GetInCarGear() const {
+		return InCarGear;
+	}
+	FORCEINLINE UAudioComponent *GetEngineSoundComponent() const {
+		return EngineSoundComponent;
+	}
 
 	UFUNCTION(BlueprintCallable)
-	float GetHealth() { return Health; }
+	float GetHealth() {
+		return Health;
+	}
 };
