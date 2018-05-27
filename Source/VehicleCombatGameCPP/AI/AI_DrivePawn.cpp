@@ -9,14 +9,8 @@
 void AAI_DrivePawn::Tick(float Delta) {
 	Super::Tick(Delta);
 
-	APlayer_DrivePawn *closestPlayer = FindClosestPlayer();
 	UWheeledVehicleMovementComponent4W *Vehicle4W = CastChecked<UWheeledVehicleMovementComponent4W>(GetVehicleMovement());
 	Vehicle4W->SetHandbrakeInput(false);
-
-	if(closestPlayer != NULL && IsValid(closestPlayer)) {
-		SetSteering(closestPlayer);
-		SetThrottle(closestPlayer);
-	}
 }
 
 void AAI_DrivePawn::SetThrottle(AActor *closestPlayer) {

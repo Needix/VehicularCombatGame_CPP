@@ -9,6 +9,8 @@
 #include "GameModes/CTF/CTF_Flag.h"
 
 void AAI_CTF_DrivePawn::Tick(float delta) {
+	Super::Tick(delta);
+
 	ACTF_Flag* flag = FindFlag();
 	if(flag == NULL) {
 		return;
