@@ -8,6 +8,7 @@
 #include "Engine/Engine.h"
 #include "GameFramework/Controller.h"
 #include "UObject/ConstructorHelpers.h"
+#include "Materials/MaterialInstanceDynamic.h"
 
 // Components Header
 #include "Components/SkeletalMeshComponent.h"
@@ -95,6 +96,12 @@ void ABase_DrivePawn::InitializeBasicComponents() {
 	// Car mesh
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CarMesh(TEXT("/Game/VehicleAdv/Vehicle/Vehicle_SkelMesh.Vehicle_SkelMesh"));
 	GetMesh()->SetSkeletalMesh(CarMesh.Object);
+
+	static ConstructorHelpers::FObjectFinder<UMaterial>Material(TEXT("Material'/Game/VehicleAdv/Materials/Fixed_Template_Master.Fixed_Template_Master'"));
+	SkeletonMeshMaterialInstance = UMaterialInstanceDynamic::Create(Material.Object, Material.Object);
+	SkeletonMeshMaterialInstance->SetScalarParameterValue("Metallic", 0);
+	SkeletonMeshMaterialInstance->SetScalarParameterValue("Roughness", 0.25);
+	GetMesh()->SetMaterial(0, SkeletonMeshMaterialInstance);
 
 	static ConstructorHelpers::FClassFinder<UObject> AnimBPClass(TEXT("/Game/VehicleAdv/Vehicle/VehicleAnimationBlueprint"));
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
@@ -405,6 +412,11 @@ void ABase_DrivePawn::FlipCarTimelineFinishedCallback() {
 	GetMesh()->SetSimulatePhysics(true);
 
 	WhileFlipping = false;
+}
+
+void ABase_DrivePawn::SetSkeletonColor(FVector color) {
+	UE_LOG(LogTemp, Warning, TEXT("Trying to set color to %f/%f/%f"), color.X, color.Y, color.Z);
+	SkeletonMeshMaterialInstance->SetVectorParameterValue("DiffuseColor", FLinearColor(color.X, color.Y, color.Z, 0));
 }
 
 #undef LOCTEXT_NAMESPACE

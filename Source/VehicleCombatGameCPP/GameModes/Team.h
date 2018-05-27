@@ -61,4 +61,6 @@ class VEHICLECOMBATGAMECPP_API ATeam : public AActor {
 	FString GetName() { return Name; }
 	UFUNCTION(BlueprintCallable, Category = Getter)
 	int GetPoints() { return Points; }
+	UFUNCTION(BlueprintCallable, Category = Getter)
+	FVector GetColor() { return Color; }
 };

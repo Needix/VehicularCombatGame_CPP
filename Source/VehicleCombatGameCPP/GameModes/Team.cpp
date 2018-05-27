@@ -159,6 +159,7 @@ ABase_DrivePawn *ATeam::SpawnCar(AController *controller, UClass *driveClass, in
 					playerController->Team = this;
 				}
 				result->Team = this;
+				result->SetSkeletonColor(Color);
 
 				if (controllerIndex < 0) {
 					TeamPlayer.Add(controller);

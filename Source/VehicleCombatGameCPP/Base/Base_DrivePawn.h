@@ -93,6 +93,9 @@ class ABase_DrivePawn : public AWheeledVehicle {
 	UPhysicalMaterial *SlipperyMaterial;
 	UPhysicalMaterial *NonSlipperyMaterial;
 
+	// Mesh Color
+	UMaterialInstanceDynamic* SkeletonMeshMaterialInstance;
+
 	// Health
 	float Health = 100;
 	bool IsCollidingWithKillPlane;
@@ -104,6 +107,8 @@ class ABase_DrivePawn : public AWheeledVehicle {
 
   public:
 	virtual void Tick(float Delta) override;
+
+	void SetSkeletonColor(FVector color);
 
 	// Interact with the car health
 	void DecreaseHealthByTime(float deltaSecondsMultiplicator);
