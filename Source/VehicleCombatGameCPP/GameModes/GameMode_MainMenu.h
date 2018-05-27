@@ -10,6 +10,7 @@ class VEHICLECOMBATGAMECPP_API AGameMode_MainMenu : public AGameMode {
 	GENERATED_BODY()
 
   public:
+	AGameMode_MainMenu();
 	UFUNCTION(BlueprintCallable, Category = "UMG Game")
 	void ChangeMenuWidget(TSubclassOf<UUserWidget> newWidgetClass);
 
