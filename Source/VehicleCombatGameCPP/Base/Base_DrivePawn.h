@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "WheeledVehicle.h"
 #include "Components/TimelineComponent.h"
+#include "Sound/SoundCue.h"
 #include "Base_DrivePawn.generated.h"
 
 class UPhysicalMaterial;
@@ -13,6 +14,8 @@ class USpringArmComponent;
 class UTextRenderComponent;
 class UInputComponent;
 class UAudioComponent;
+
+enum class HealthStageEnum : uint8 { Normal, Smoke, Fire, Explosion };
 
 UCLASS(config = Game)
 class ABase_DrivePawn : public AWheeledVehicle {
@@ -44,13 +47,10 @@ class ABase_DrivePawn : public AWheeledVehicle {
 	class UParticleSystemComponent *ExhaustParticles;
 
 	UPROPERTY(VisibleAnywhere)
-	class UParticleSystemComponent *HealthSmoke;
+	class UParticleSystemComponent *HealthParticles;
 
 	UPROPERTY(VisibleAnywhere)
-	class UParticleSystemComponent *HealthFire;
-
-	UPROPERTY(VisibleAnywhere)
-	class UParticleSystemComponent *HealthExplosion;
+	class UAudioComponent *HealthSound;
 
   public:
 	ABase_DrivePawn();
@@ -92,12 +92,19 @@ class ABase_DrivePawn : public AWheeledVehicle {
 	bool bIsLowFriction;
 	UPhysicalMaterial *SlipperyMaterial;
 	UPhysicalMaterial *NonSlipperyMaterial;
+	UParticleSystem *SmokeParticleSystem;
+	UParticleSystem *FireParticleSystem;
+	UParticleSystem *ExplosionParticleSystem;
+	USoundCue *SmokeSoundCue;
+	USoundCue *FireSoundCue;
+	USoundCue *ExplosionSoundCue;
 
 	// Mesh Color
 	UMaterialInstanceDynamic* SkeletonMeshMaterialInstance;
 
 	// Health
 	float Health = 100;
+	HealthStageEnum HealthStage = HealthStageEnum::Normal;
 	bool IsCollidingWithKillPlane;
 
 	float CurrentDeltaSeconds;
@@ -138,6 +145,7 @@ class ABase_DrivePawn : public AWheeledVehicle {
 	void InitializeBasicComponents();
 	void InitializeCar();
 	void InitializeParticleSystems();
+	void InitializeSoundCues();
 	void InitializeOtherComponents();
 	void InitializeFlipCarTimeline();
 
