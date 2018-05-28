@@ -6,8 +6,9 @@ using System.Collections.Generic;
 public class VehicleCombatGameCPPTarget : TargetRules
 {
 	public VehicleCombatGameCPPTarget(TargetInfo Target) : base(Target)
-	{
-		Type = TargetType.Game;
+    {
+        bUsesSteam = true;
+        Type = TargetType.Game;
 		ExtraModuleNames.Add("VehicleCombatGameCPP");
 	}
 }

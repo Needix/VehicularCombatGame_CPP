@@ -6,8 +6,9 @@ using System.Collections.Generic;
 public class VehicleCombatGameCPPEditorTarget : TargetRules
 {
 	public VehicleCombatGameCPPEditorTarget(TargetInfo Target) : base(Target)
-	{
-		Type = TargetType.Editor;
+    {
+        bUsesSteam = true;
+        Type = TargetType.Editor;
 		ExtraModuleNames.Add("VehicleCombatGameCPP");
 	}
 }

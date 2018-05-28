@@ -22,8 +22,10 @@ public class VehicleCombatGameCPP : ModuleRules
          });
 
         PublicDependencyModuleNames.AddRange(new string[] {
-             "OnlineSubsystem", "OnlineSubsystemUtils", "OnlineSubsystemSteam"
+             "OnlineSubsystem", "OnlineSubsystemUtils"
         });
+
+        DynamicallyLoadedModuleNames.Add("OnlineSubsystemSteam");
 
         PublicDefinitions.Add("HMD_MODULE_INCLUDED=1");
 	}
