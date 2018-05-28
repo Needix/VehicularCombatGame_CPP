@@ -20,7 +20,7 @@ class VEHICLECOMBATGAMECPP_API APlayer_Controller : public APlayerController {
 
 	public:
 		ATeam* Team;
-		float RespawnTimer;
+		float RespawnTimer = 50000;
 	
 	public:
 		virtual void BeginPlay() override;

@@ -18,8 +18,12 @@ public class VehicleCombatGameCPP : ModuleRules
              "OnlineSubsystemUtils",
              "Landscape",
              "Steamworks",
-             "UMG", "Slate", "SlateCore"
+             "UMG", "Slate", "SlateCore",
          });
+
+        PublicDependencyModuleNames.AddRange(new string[] {
+             "OnlineSubsystem", "OnlineSubsystemUtils", "OnlineSubsystemSteam"
+        });
 
         PublicDefinitions.Add("HMD_MODULE_INCLUDED=1");
 	}

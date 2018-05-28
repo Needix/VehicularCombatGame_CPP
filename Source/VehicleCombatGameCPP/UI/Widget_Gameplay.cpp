@@ -10,10 +10,11 @@
 #include "Kismet/GameplayStatics.h"
 #include "Engine/Engine.h"
 
+#include "Base/Base_GameMode.h"
 #include "AllLevel/Singleton.h"
 
 void UWidget_Gameplay::NativeTick(const FGeometry& MyGeometry, float InDeltaTime) {
-	if(Teams.Num() == 0) {
+	if(Teams.Num() != ABase_GameMode::MaxTeams) {
 		TArray<AActor *> teams;
 		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ATeam::StaticClass(), teams);
 		Teams = SortTeamsByName(teams);

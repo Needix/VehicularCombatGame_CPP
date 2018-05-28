@@ -11,8 +11,9 @@
 
 // Custom Header
 #include "Base/Base_DrivePawn.h"
-
 #include "Team.generated.h"
+
+class APlayer_Controller;
 
 UCLASS()
 class VEHICLECOMBATGAMECPP_API ATeam : public AActor {
@@ -23,8 +24,11 @@ class VEHICLECOMBATGAMECPP_API ATeam : public AActor {
 	float DeltaSeconds;
 	float AI_RespawnTimer;
 
+	UPROPERTY(ReplicatedUsing=OnRep_SetupPropertyName)
 	FString Name;
+	UPROPERTY(ReplicatedUsing=OnRep_SetupPropertyId)
 	int Id;
+	UPROPERTY(ReplicatedUsing=OnRep_SetupPropertyColor)
 	FVector Color;
 	int Points;
 
@@ -36,6 +40,15 @@ class VEHICLECOMBATGAMECPP_API ATeam : public AActor {
 
 	// Functions
   private:
+    UFUNCTION()
+	void OnRep_SetupPropertyName();
+    UFUNCTION()
+	void OnRep_SetupPropertyId();
+    UFUNCTION()
+	void OnRep_SetupPropertyColor();
+    UFUNCTION()
+	void OnRep_SetupProperty();
+
 	void HandleAIRespawn(float DeltaTime);
 	void HandlePlayerRespawn(float Delta);
 
@@ -51,11 +64,16 @@ class VEHICLECOMBATGAMECPP_API ATeam : public AActor {
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	
+	int GetNumberAIInTeam();
+	int GetNumberPlayerInTeam();
+	bool CanSupportAnotherPlayer();
+
 	void IncreasePoints(int amount);
 	void DecreasePoints(int amount) { Points -= amount; }
 
+	void AddPlayer(APlayer_Controller* controller);
+
 	ABase_DrivePawn *SpawnCar(AController *controller, UClass *driveClass);
-	ABase_DrivePawn *SpawnCar(AController *controller, UClass *driveClass, int controllerIndex);
 	
 	UFUNCTION(BlueprintCallable, Category = Getter)
 	FString GetName() { return Name; }

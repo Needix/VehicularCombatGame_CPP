@@ -26,6 +26,9 @@ class ABase_DrivePawn : public AWheeledVehicle {
 	UCameraComponent *Camera;
 
 	UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UCameraComponent *TopDownCamera;
+
+	UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class USceneComponent *InternalCameraBase;
 
 	UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
@@ -85,6 +88,7 @@ class ABase_DrivePawn : public AWheeledVehicle {
 
 	FVector InternalCameraOrigin;
 
+	UPROPERTY(Replicated)
 	class ATeam* Team;
 
   private:
@@ -121,8 +125,6 @@ class ABase_DrivePawn : public AWheeledVehicle {
 	virtual void BeginPlay() override;
 
   private:
-	// Camera/HUD
-	void EnableIncarView(const bool bState);
 
 	/*UFUNCTION()
 	void ActorBeginOverlap1(class AActor* actor, class AActor* otherActor);*/
@@ -147,6 +149,7 @@ class ABase_DrivePawn : public AWheeledVehicle {
 	void UpdateInCarHUD();
 	void UpdateHUDStrings();
 	void UpdateSound();
+	void UpdateCarColor();
 	void FlipCar();
 
   public:

@@ -9,6 +9,7 @@
 #include "GameFramework/Controller.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "UnrealNetwork.h"
 
 // Components Header
 #include "Components/SkeletalMeshComponent.h"
@@ -42,6 +43,9 @@ const FName ABase_DrivePawn::EngineAudioRPM("RPM");
 #define LOCTEXT_NAMESPACE "VehiclePawn"
 
 ABase_DrivePawn::ABase_DrivePawn() {
+	bReplicates = true;
+	bAlwaysRelevant = true;
+
 	InitializeBasicComponents();
 
 	// Setup friction materials
@@ -252,10 +256,18 @@ void ABase_DrivePawn::InitializeOtherComponents() {
 	EngineSoundComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("EngineSound"));
 	EngineSoundComponent->SetSound(SoundCue.Object);
 	EngineSoundComponent->SetupAttachment(GetMesh());
+
+	// Create the topdown camera component
+	TopDownCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("TopdownCamera"));
+	TopDownCamera->SetupAttachment(RootComponent);
+	TopDownCamera->SetRelativeLocation(FVector(0.0f, 0.0f, 10000.0f));
+	TopDownCamera->SetRelativeRotation(FRotator(270.0f, 00.0f, 0.0f));
+	TopDownCamera->bUsePawnControlRotation = false;
+	TopDownCamera->FieldOfView = 90.f;
 }
 
 void ABase_DrivePawn::InitializeFlipCarTimeline() {
-	static ConstructorHelpers::FObjectFinder<UCurveFloat> Curve(TEXT("/Game/VehicularCombatGame/Curves/Linear.Linear"));
+	static ConstructorHelpers::FObjectFinder<UCurveFloat> Curve(TEXT("CurveFloat'/Game/VehicularCombatGame/Curves/Linear.Linear'"));
 
 	FlipCarTimeline = NewObject<UTimelineComponent>(this, FName("FlipCarTimeline"));
 	FlipCarTimeline->SetPropertySetObject(this);
@@ -284,6 +296,7 @@ void ABase_DrivePawn::Tick(float Delta) {
 	UpdateInCarHUD();
 	UpdateSound();
 	FlipCar();
+	UpdateCarColor();
 }
 void ABase_DrivePawn::UpdateSound() {
 	// Pass the engine RPM to the sound component
@@ -327,6 +340,11 @@ void ABase_DrivePawn::UpdatePhysicsMaterial() {
 			GetMesh()->SetPhysMaterialOverride(SlipperyMaterial);
 			bIsLowFriction = true;
 		}
+	}
+}
+void ABase_DrivePawn::UpdateCarColor() {
+	if(IsValid(Team)) {
+		SetSkeletonColor(Team->GetColor());
 	}
 }
 
@@ -398,7 +416,6 @@ void ABase_DrivePawn::FlipCar() {
 
 	FlipCarTimeline->PlayFromStart();
 }
-
 void ABase_DrivePawn::FlipCarTimelineCallback(float val) {
 	FRotator rotation = OldFlipCarRotation;
 
@@ -407,7 +424,6 @@ void ABase_DrivePawn::FlipCarTimelineCallback(float val) {
 
 	SetActorRotation(rotation, ETeleportType::TeleportPhysics);
 }
-
 void ABase_DrivePawn::FlipCarTimelineFinishedCallback() {
 	GetMesh()->SetSimulatePhysics(true);
 
@@ -415,8 +431,13 @@ void ABase_DrivePawn::FlipCarTimelineFinishedCallback() {
 }
 
 void ABase_DrivePawn::SetSkeletonColor(FVector color) {
-	UE_LOG(LogTemp, Warning, TEXT("Trying to set color to %f/%f/%f"), color.X, color.Y, color.Z);
 	SkeletonMeshMaterialInstance->SetVectorParameterValue("DiffuseColor", FLinearColor(color.X, color.Y, color.Z, 0));
+}
+
+void ABase_DrivePawn::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const {
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+ 
+    DOREPLIFETIME(ABase_DrivePawn, Team);
 }
 
 #undef LOCTEXT_NAMESPACE

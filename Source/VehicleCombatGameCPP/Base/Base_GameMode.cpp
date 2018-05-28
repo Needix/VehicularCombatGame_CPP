@@ -47,28 +47,33 @@ void ABase_GameMode::Tick(float Delta) {
 	if (!LevelBoundarySet) {
 		FindLevelBoundaries();
 		CreateTeams();
-		SpawnPlayer(Teams[UKismetMathLibrary::RandomInteger(Teams.Num())]); // TODO: Dont put player into random team
-		SpawnAIs();
+	} else {
+		TArray<AActor *> actors;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayer_Controller::StaticClass(), actors);
+		for(AActor* actor : actors) {
+			APlayer_Controller* pc = CastChecked<APlayer_Controller>(actor);
+			if(!IsValid(pc->Team)) {
+				AddPlayerToAnyTeam(pc);
+			}
+		}
 	}
 }
 
+void ABase_GameMode::PostLogin(APlayerController* NewPlayer) {
+	UE_LOG(LogTemp, Display, TEXT("New player joined (%s)!"), *NewPlayer->GetClass()->GetName());
+}
+
+// Initial spawning of stuff
 void ABase_GameMode::FindLevelBoundaries() {
 	TArray<AActor *> levelBoundaries;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ALevelBoundary::StaticClass(), levelBoundaries);
-	if (levelBoundaries.Num() < 2) {
-		UE_LOG(LogTemp, Fatal, TEXT("Base_GameMode: Could not find enough level boundary objects!"));
-		return;
-	}
+	check(levelBoundaries.Num() == 2);
 	LevelBoundary1 = levelBoundaries[0]->GetActorLocation();
 	LevelBoundary2 = levelBoundaries[1]->GetActorLocation();
 	LevelBoundarySet = true;
-	/*for(int i = 0; i < levelBoundaries.Num(); i++) {
-		ALevelBoundary* levelBoundary = (ALevelBoundary*)levelBoundaries[i];
-		levelBoundary->GetActorLocation();
-	}*/
 }
-
 void ABase_GameMode::CreateTeams() {
+	UE_LOG(LogTemp, Display, TEXT("Creating teams..."));
 	for (int i = 0; i < MaxTeams; i++) {
 		FVector location = GetRandomTerrainLocation();
 		location.Z = location.Z + 100;
@@ -81,21 +86,27 @@ void ABase_GameMode::CreateTeams() {
 		Teams.Add(team);
 	}
 }
-
-void ABase_GameMode::SpawnPlayer(ATeam *team) {
-	APlayerController *pc = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-	ABase_DrivePawn *spawnedCar = team->SpawnCar(pc, APlayer_DrivePawn::StaticClass());
+void ABase_GameMode::AddPlayerToAnyTeam(APlayer_Controller *pc) {
+	UE_LOG(LogTemp, Display, TEXT("Trying to add player to team: %s"), *pc->GetName());
+	ATeam* team = FindTeamForPlayer(pc);
+	team->AddPlayer(pc);
 }
-
-void ABase_GameMode::SpawnAIs() {
-	for (ATeam *team : Teams) {
-		TArray<AController *> controllerArray = team->TeamPlayer;
-		for (int i = controllerArray.Num(); i < MaxCarsPerTeam; i++) {
-			ABase_DrivePawn *spawnedCar = team->SpawnCar(NULL, GetAIPawnClass());
+ATeam* ABase_GameMode::FindTeamForPlayer(APlayer_Controller* pc) {
+	ATeam* result = NULL;
+	int highestNumberAIInTeam = 0;
+	check(Teams.Num() != 0);
+	for(ATeam* team : Teams) {
+		int currentNumberAIInTeam = team->GetNumberAIInTeam();
+		int numberOfControllerInTeam = team->TeamPlayer.Num();
+		if((result == NULL && (currentNumberAIInTeam > 0 || numberOfControllerInTeam != MaxCarsPerTeam)) || (highestNumberAIInTeam < currentNumberAIInTeam)) { // Lowest number not set yet OR current team has more space -> set new team as "best"
+			result = team;
+			highestNumberAIInTeam = currentNumberAIInTeam;
 		}
 	}
+	return result;
 }
 
+// Helper for spawning
 FVector ABase_GameMode::GetRandomTerrainLocation() {
 	for(int i = 0; true; i++) {
 		float locX = UKismetMathLibrary::RandomFloatInRange(GetMinX(), GetMaxX());
@@ -113,7 +124,7 @@ FVector ABase_GameMode::GetRandomTerrainLocation() {
 			return outHit.Location;
 		}
 		if (i == 70) {
-			UE_LOG(LogTemp, Warning, TEXT("Base_GameMode: Currently at %i tries to create teams! Trying 10 more tries..."), i);
+			UE_LOG(LogTemp, Warning, TEXT("Base_GameMode: Currently at %i tries to create teams! Trying 30 more tries..."), i);
 		} else if (i == 100) {
 			UE_LOG(LogTemp, Fatal, TEXT("Base_GameMode: Could not spawn teams after %i tries! Aborting..."), i);
 		}
@@ -124,10 +135,10 @@ float ABase_GameMode::GetMinX() { return UKismetMathLibrary::Min( LevelBoundary1
 float ABase_GameMode::GetMaxY() { return UKismetMathLibrary::Max( LevelBoundary1.Y, LevelBoundary2.Y); }
 float ABase_GameMode::GetMinY() { return UKismetMathLibrary::Min( LevelBoundary1.Y, LevelBoundary2.Y); }
 
+// Getter
 float ABase_GameMode::GetRespawnTime() {
 	return CONST_DeathRespawnTime;
 }
-
 UClass* ABase_GameMode::GetAIPawnClass() {
 	return AAI_DrivePawn::StaticClass();
 }

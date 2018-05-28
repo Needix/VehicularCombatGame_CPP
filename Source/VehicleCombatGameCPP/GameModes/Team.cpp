@@ -8,6 +8,7 @@
 #include "EngineUtils.h"
 #include "Engine/Engine.h"
 #include "Landscape.h"
+#include "UnrealNetwork.h"
 #include "UObject/ConstructorHelpers.h"
 
 // Component Header
@@ -16,6 +17,7 @@
 
 // Custom Header
 #include "AI/AI_DrivePawn.h"
+#include "AI/AI_Controller.h"
 #include "Helper/GeneralHelper.h"
 #include "Base/Base_GameMode.h"
 #include "Player/Player_Controller.h"
@@ -23,6 +25,10 @@
 
 // Sets default values
 ATeam::ATeam() {
+	//SetReplicates(true);
+	bReplicates = true;
+	bAlwaysRelevant = true;
+
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -43,6 +49,7 @@ void ATeam::Setup(FString pName, int pId, FVector pColor) {
 	Id = pId;
 	Color = pColor;
 
+	baseParticleSystemComponent->InstanceParameters.Empty();
 	FParticleSysParam sysParam = FParticleSysParam();
 	sysParam.Name = FName(TEXT("PSpawn"));
 	sysParam.ParamType = PSPT_Scalar;
@@ -74,6 +81,27 @@ void ATeam::Setup(FString pName, int pId, FVector pColor) {
 	baseParticleSystemComponent->InstanceParameters.Add(sysParam5);
 
 }
+void ATeam::OnRep_SetupPropertyName() {
+	OnRep_SetupProperty();
+}
+void ATeam::OnRep_SetupPropertyId() {
+	OnRep_SetupProperty();
+}
+void ATeam::OnRep_SetupPropertyColor() {
+	OnRep_SetupProperty();
+}
+void ATeam::OnRep_SetupProperty() {
+	UE_LOG(LogTemp, Warning, TEXT("Calling SetupProperty with: %s %i %f %f %f on %s"), *Name, Id, Color.X, Color.Y, Color.Z, *this->GetName());
+	Setup(Name, Id, Color);
+}
+
+void ATeam::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const {
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+ 
+    DOREPLIFETIME(ATeam, Name);
+    DOREPLIFETIME(ATeam, Id);
+    DOREPLIFETIME(ATeam, Color);
+}
 
 // Called when the game starts or when spawned
 void ATeam::BeginPlay() {
@@ -83,16 +111,18 @@ void ATeam::BeginPlay() {
 // Called every frame
 void ATeam::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
-	HandlePlayerRespawn(DeltaTime);
-	HandleAIRespawn(DeltaTime);
+	if(this->HasAuthority()) {
+		HandlePlayerRespawn(DeltaTime);
+		HandleAIRespawn(DeltaTime);
+	}
 }
 
 void ATeam::HandlePlayerRespawn(float DeltaTime) {
 	for(int i = 0; i < TeamPlayer.Num(); i++) {
-		if(TeamPlayer[i]->GetClass()->IsChildOf(APlayer_Controller::StaticClass())) {
+		if(IsValid(TeamPlayer[i]) && TeamPlayer[i]->GetClass()->IsChildOf(APlayer_Controller::StaticClass())) {
 			APlayer_Controller* aPlayerController = CastChecked<APlayer_Controller>(TeamPlayer[i]);
-			if(aPlayerController->RespawnTimer > GeneralHelper::PlayerRespawnTime) {
-				ABase_DrivePawn* newCar = SpawnCar(aPlayerController, APlayer_DrivePawn::StaticClass(), i);
+			if(aPlayerController->GetPawn() == nullptr && aPlayerController->RespawnTimer > GeneralHelper::PlayerRespawnTime) {
+				ABase_DrivePawn* newCar = SpawnCar(aPlayerController, APlayer_DrivePawn::StaticClass());
 			}
 		}
 	}
@@ -101,35 +131,69 @@ void ATeam::HandlePlayerRespawn(float DeltaTime) {
 void ATeam::HandleAIRespawn(float DeltaTime) {
 	AI_RespawnTimer += DeltaTime;
 
-	ABase_GameMode *gameMode = CastChecked<ABase_GameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+	AGameModeBase* gameModeBase = UGameplayStatics::GetGameMode(GetWorld());
+	if(!gameModeBase) {
+		return;
+	}
+	ABase_GameMode *gameMode = CastChecked<ABase_GameMode>(gameModeBase);
 	UClass* aiClass = gameMode->GetAIPawnClass();
+
+	// Respawn AIs until we hit the limit (if we dont have enough)
+	for (int i = 0; TeamPlayer.Num() < gameMode->MaxCarsPerTeam; i++) {
+		ABase_DrivePawn* car = SpawnCar(NULL, aiClass);
+		TeamPlayer.Add(car->GetController());
+	}
+
+	// Dont allow respawn until respawn time is reached
 	if (AI_RespawnTimer < gameMode->GetRespawnTime()) {
 		return;
 	}
 
-	if (TeamPlayer.Num() < gameMode->MaxCarsPerTeam) {
-		SpawnCar(NULL, aiClass);
-		AI_RespawnTimer = 0;
-		return;
-	}
-
+	// Respawn "dead" AIs, one at a time
 	for (int i = 0; i < TeamPlayer.Num(); i++) {
 		AController *controller = TeamPlayer[i];
 
 		if (!IsValid(controller)) {
-			SpawnCar(NULL, aiClass, i);
+			ABase_DrivePawn* car = SpawnCar(NULL, aiClass);
+			TeamPlayer[i] = car->GetController();
 			AI_RespawnTimer = 0;
 			return;
 		}
 	}
 }
 
-ABase_DrivePawn *ATeam::SpawnCar(AController *controller, UClass *driveClass) {
-	return SpawnCar(controller, driveClass, -1);
+void ATeam::AddPlayer(APlayer_Controller* controller) {
+	controller->Team = this;
+	int aiIndex = -1;
+	// Try to find a index where we can insert the new controller
+	for(int i = 0; i < TeamPlayer.Num(); i++) {
+		if(!IsValid(TeamPlayer[i])) { // Controller in index is not valid anymore. Use the index
+			aiIndex = i;
+			break;
+		}
+		if(TeamPlayer[i]->GetClass()->IsChildOf(AAIController::StaticClass())) { // Choose a AI controller as backup (destroy it, if we dont have space)
+			aiIndex = i;
+		}
+	}
+	if(aiIndex == -1) { // Is there a index in the array we can use to add this player? 
+		this->TeamPlayer.Add(controller); // If there is no space: Just add it
+	} else {
+		if(IsValid(TeamPlayer[aiIndex])) {
+			// TODO: Destroy the pawn only (so "explosion" is triggered)
+			TeamPlayer[aiIndex]->Destroy();
+		}
+		TeamPlayer[aiIndex] = controller; // Replace the index with the new controller
+	}
 }
-ABase_DrivePawn *ATeam::SpawnCar(AController *controller, UClass *driveClass, int controllerIndex) {
+
+
+
+ABase_DrivePawn *ATeam::SpawnCar(AController *controller, UClass *driveClass) {
+	if(!IsValid(this) || !HasAuthority()) {
+		return NULL;
+	}
 	int tries = 0;
-	UE_LOG(LogTemp, Display, TEXT("Trying to spawn car for %s for team %s"), controller == NULL ? TEXT("") : *controller->GetName(), *this->GetName());
+	UE_LOG(LogTemp, Display, TEXT("Trying to spawn car for %s for team %s"), controller == NULL ? TEXT("AI") : *controller->GetName(), *this->GetName());
 	while (true) {
 		FVector currentLocation = GetActorLocation();
 		float randomX = this->GetActorLocation().X + UKismetMathLibrary::RandomFloatInRange(-1000, 1000);
@@ -155,17 +219,10 @@ ABase_DrivePawn *ATeam::SpawnCar(AController *controller, UClass *driveClass, in
 					controller = result->GetController();
 				} else {
 					controller->Possess(result);
-					APlayer_Controller *playerController = CastChecked<APlayer_Controller>(controller);
-					playerController->Team = this;
 				}
 				result->Team = this;
 				result->SetSkeletonColor(Color);
 
-				if (controllerIndex < 0) {
-					TeamPlayer.Add(controller);
-				} else {
-					TeamPlayer[controllerIndex] = controller;
-				}
 				UE_LOG(LogTemp, Display, TEXT("Car spawned successfull for %s at location %f/%f/%f for team %s"), *controller->GetName(), randomX, randomY, currentLocation.Z, *this->GetName());
 				return result;
 			}
@@ -177,6 +234,28 @@ ABase_DrivePawn *ATeam::SpawnCar(AController *controller, UClass *driveClass, in
 			UE_LOG(LogTemp, Fatal, TEXT("Base_GameMode: Could not spawn car after %i tries! Aborting..."), tries);
 		}
 	}
+}
+
+int ATeam::GetNumberAIInTeam() {
+	int result = 0;
+	for(AController* controller : TeamPlayer) {
+		if(controller->GetClass()->IsChildOf(AAIController::StaticClass())) {
+			result++;
+		}
+	}
+	return result;
+}
+int ATeam::GetNumberPlayerInTeam() {
+	int result = 0;
+	for(AController* controller : TeamPlayer) {
+		if(controller->GetClass()->IsChildOf(APlayerController::StaticClass())) {
+			result++;
+		}
+	}
+	return result;
+}
+bool ATeam::CanSupportAnotherPlayer() {
+	return GetNumberAIInTeam() > 0;
 }
 
 void ATeam::IncreasePoints(int amount) {

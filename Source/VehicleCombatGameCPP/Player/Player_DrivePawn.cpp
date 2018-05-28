@@ -18,6 +18,9 @@
 #include "HeadMountedDisplayFunctionLibrary.h"
 #endif // HMD_MODULE_INCLUDED
 
+#include "Player/Player_Controller.h"
+#include "AllLevel/MyGameInstance.h"
+
 const FName APlayer_DrivePawn::LookUpBinding("LookUp");
 const FName APlayer_DrivePawn::LookRightBinding("LookRight");
 
@@ -91,6 +94,9 @@ void APlayer_DrivePawn::SetupPlayerInputComponent(class UInputComponent *PlayerI
 
 	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &APlayer_DrivePawn::OnResetVR);
 	PlayerInputComponent->BindAction("Horn", IE_Pressed, this, &APlayer_DrivePawn::OnHorn);
+
+	PlayerInputComponent->BindAction("ConnectToServer", IE_Pressed, this, &APlayer_DrivePawn::OnJoinServer);
+	PlayerInputComponent->BindAction("HostServer", IE_Pressed, this, &APlayer_DrivePawn::OnHostServer);
 }
 
 void APlayer_DrivePawn::MoveForward(float Val) {
@@ -107,6 +113,20 @@ void APlayer_DrivePawn::OnHandbrakePressed() {
 
 void APlayer_DrivePawn::OnHandbrakeReleased() {
 	GetVehicleMovementComponent()->SetHandbrakeInput(false);
+}
+
+void APlayer_DrivePawn::OnHostServer() {
+	APlayer_Controller* pc = CastChecked<APlayer_Controller>(this->GetController());
+	UE_LOG(LogTemp, Warning, TEXT("OnHostServer for %i"), pc->NetPlayerIndex);
+	UMyGameInstance* gameInstance = CastChecked<UMyGameInstance>(GetGameInstance());
+	gameInstance->Host(pc->NetPlayerIndex);
+}
+
+void APlayer_DrivePawn::OnJoinServer() {
+	APlayer_Controller* pc = CastChecked<APlayer_Controller>(this->GetController());
+	UE_LOG(LogTemp, Warning, TEXT("OnJoinServer for %i"), pc->NetPlayerIndex);
+	UMyGameInstance* gameInstance = CastChecked<UMyGameInstance>(GetGameInstance());
+	gameInstance->Join(pc->NetPlayerIndex);
 }
 
 void APlayer_DrivePawn::UpdateHMDCamera() {

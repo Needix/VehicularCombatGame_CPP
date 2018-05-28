@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameMode.h"
+#include "Player/Player_Controller.h"
 #include "GameModes/Team.h"
 #include "Base_GameMode.generated.h"
 
@@ -24,24 +25,25 @@ class VEHICLECOMBATGAMECPP_API ABase_GameMode : public AGameMode {
 	// Color
 	TArray<FVector> TeamColors; 
 
-
   public:
-	const int CONST_DeathRespawnTime = 3;
-	int MaxTeams = 4;
-	int MaxCarsPerTeam = 2;
+	const static int CONST_DeathRespawnTime = 3;
+	const static int MaxTeams = 4;
+	const static int MaxCarsPerTeam = 2;
 	TArray<ATeam *> Teams;
 
 	// Functions
   private:
 	void FindLevelBoundaries();
 	void CreateTeams();
-	void SpawnPlayer(ATeam *team);
-	void SpawnAIs();
+	void AddPlayerToAnyTeam(APlayer_Controller *pc);
+	ATeam* FindTeamForPlayer(APlayer_Controller* pc);
 
   public:
 	ABase_GameMode();
 	void Tick(float Delta) override;
 	void BeginPlay() override;
+
+	virtual void PostLogin(APlayerController* NewPlayer) override;
 
 	FVector GetRandomTerrainLocation();
 	float GetMaxX();
