@@ -91,3 +91,6 @@ Makefile
 *.pro
 *.kdev4
 *CodeCompletionFolders.txt
+
+# External content
+Content/KiteDemo
