@@ -19,6 +19,7 @@ public class VehicleCombatGameCPP : ModuleRules
              "Landscape",
              "Steamworks",
              "UMG", "Slate", "SlateCore",
+             "RHI"
          });
 
         PublicDependencyModuleNames.AddRange(new string[] {
