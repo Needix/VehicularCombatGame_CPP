@@ -59,6 +59,7 @@ ABase_DrivePawn::ABase_DrivePawn() {
 	InitializeCar();
 	InitializeOtherComponents();
 	InitializeParticleSystems();
+	InitializeSoundCues();
 	InitializeFlipCarTimeline();
 
 	// Colors for the in-car gear display. One for normal one for reverse
@@ -115,29 +116,38 @@ void ABase_DrivePawn::InitializeBasicComponents() {
 }
 void ABase_DrivePawn::InitializeParticleSystems() {
 	static ConstructorHelpers::FObjectFinder<UParticleSystem> ExhaustParticleSystem(TEXT("ParticleSystem'/Game/VehicularCombatGame/ParticleEffects/Fire.Fire'"));
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> SmokeParticles(TEXT("ParticleSystem'/Game/StarterContent/Particles/P_Smoke.P_Smoke'"));
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> FireParticles(TEXT("ParticleSystem'/Game/StarterContent/Particles/P_Fire.P_Fire'"));
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> ExplosionParticles(TEXT("ParticleSystem'/Game/StarterContent/Particles/P_Explosion.P_Explosion'"));
+
+	SmokeParticleSystem = SmokeParticles.Object;
+	FireParticleSystem = FireParticles.Object;
+	ExplosionParticleSystem = ExplosionParticles.Object;
+
 	ExhaustParticles = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("ExhaustParticles"));
 	ExhaustParticles->SetRelativeLocation(FVector(-78.8f, -5.8f, 26.6f));
 	ExhaustParticles->SetTemplate(ExhaustParticleSystem.Object);
 	ExhaustParticles->SetupAttachment(GetMesh());
 
-	static ConstructorHelpers::FObjectFinder<UParticleSystem> SmokeParticleSystem(TEXT("ParticleSystem'/Game/StarterContent/Particles/P_Smoke.P_Smoke'"));
-	HealthSmoke = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("HealthSmoke"));
-	HealthSmoke->SetTemplate(SmokeParticleSystem.Object);
-	HealthSmoke->bAutoActivate = false;
-	HealthSmoke->SetupAttachment(GetMesh());
-
-	static ConstructorHelpers::FObjectFinder<UParticleSystem> FireParticleSystem(TEXT("ParticleSystem'/Game/StarterContent/Particles/P_Fire.P_Fire'"));
-	HealthFire = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("HealthFire"));
-	HealthFire->SetTemplate(FireParticleSystem.Object);
-	HealthFire->bAutoActivate = false;
-	HealthFire->SetupAttachment(GetMesh());
-
-	static ConstructorHelpers::FObjectFinder<UParticleSystem> ExplosionParticleSystem(TEXT("ParticleSystem'/Game/StarterContent/Particles/P_Explosion.P_Explosion'"));
-	HealthExplosion = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("HealthExplosion"));
-	HealthExplosion->SetTemplate(FireParticleSystem.Object);
-	HealthExplosion->bAutoActivate = false;
-	HealthExplosion->SetupAttachment(GetMesh());
+	HealthParticles = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("HealthParticles"));
+	HealthParticles->bAutoActivate = false;
+	HealthParticles->SetupAttachment(GetMesh());
 }
+
+void ABase_DrivePawn::InitializeSoundCues() {
+	static ConstructorHelpers::FObjectFinder<USoundCue> SmokeSound(TEXT("SoundCue'/Game/StarterContent/Audio/Smoke01_Cue.Smoke01_Cue'"));
+	static ConstructorHelpers::FObjectFinder<USoundCue> FireSound(TEXT("SoundCue'/Game/StarterContent/Audio/Fire01_Cue.Fire01_Cue'"));
+	static ConstructorHelpers::FObjectFinder<USoundCue> ExplosionSound(TEXT("SoundCue'/Game/StarterContent/Audio/Explosion_Cue.Explosion_Cue'"));
+
+	SmokeSoundCue = SmokeSound.Object;
+	FireSoundCue = FireSound.Object;
+	ExplosionSoundCue = ExplosionSound.Object;
+
+	HealthSound = CreateDefaultSubobject<UAudioComponent>(TEXT("HealthSound"));
+	HealthSound->bAutoActivate = false;
+	HealthSound->SetupAttachment(GetMesh());
+}
+
 void ABase_DrivePawn::InitializeCar() {
 	UWheeledVehicleMovementComponent4W *Vehicle4W = CastChecked<UWheeledVehicleMovementComponent4W>(GetVehicleMovement());
 
@@ -382,15 +392,54 @@ void ABase_DrivePawn::UpdateHealth() {
 		DecreaseHealthByTime(10);
 	}
 
+	HealthStageEnum newStage;
+
 	if (Health <= 0) {
-		HealthExplosion->ActivateSystem();
-		DestroyCar();
+		newStage = HealthStageEnum::Explosion;
 	} else if (Health <= 10) {
-		HealthFire->ActivateSystem();
+		newStage = HealthStageEnum::Fire;
 	} else if (Health <= 30) {
-		HealthSmoke->ActivateSystem();
+		newStage = HealthStageEnum::Smoke;
+	} else {
+		newStage = HealthStageEnum::Normal;
+	}
+
+	if (newStage != HealthStage) {
+		HealthStage = newStage;
+
+		switch (HealthStage) {
+			case HealthStageEnum::Normal:
+				HealthParticles->DeactivateSystem();
+
+				HealthSound->Deactivate();
+				break;
+			case HealthStageEnum::Smoke:
+				HealthParticles->SetTemplate(SmokeParticleSystem);
+				HealthParticles->ActivateSystem();
+
+				HealthSound->SetSound(SmokeSoundCue);
+				HealthSound->Activate();
+				break;
+			case HealthStageEnum::Fire:
+				HealthParticles->SetTemplate(FireParticleSystem);
+				HealthParticles->ActivateSystem();
+
+				HealthSound->SetSound(FireSoundCue);
+				HealthSound->Activate();
+				break;
+			case HealthStageEnum::Explosion:
+				HealthParticles->SetTemplate(ExplosionParticleSystem);
+				HealthParticles->ActivateSystem();
+
+				HealthSound->SetSound(ExplosionSoundCue);
+				HealthSound->Activate();
+
+				DestroyCar();// TODO: Use timer to be able to see and hear the explosion
+				break;
+		}
 	}
 }
+
 void ABase_DrivePawn::DestroyCar() {
 	Destroy();
 }

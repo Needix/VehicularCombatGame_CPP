@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "GameModes/Team.h"
-#include "UI/Widget_Gameplay.h"
 #include "Player_Controller.generated.h"
 
 /**
@@ -15,9 +14,6 @@ UCLASS()
 class VEHICLECOMBATGAMECPP_API APlayer_Controller : public APlayerController {
 	GENERATED_BODY()
 		
-	private:
-		UWidget_Gameplay* Widget_Gameplay;
-
 	public:
 		ATeam* Team;
 		float RespawnTimer = 50000;
@@ -25,6 +21,4 @@ class VEHICLECOMBATGAMECPP_API APlayer_Controller : public APlayerController {
 	public:
 		virtual void BeginPlay() override;
 		virtual void Tick(float Delta) override;
-	
-	
 };

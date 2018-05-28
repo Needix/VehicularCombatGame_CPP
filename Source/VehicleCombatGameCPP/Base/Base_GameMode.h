@@ -6,6 +6,7 @@
 #include "GameFramework/GameMode.h"
 #include "Player/Player_Controller.h"
 #include "GameModes/Team.h"
+#include "UI/Widget_Gameplay.h"
 #include "Base_GameMode.generated.h"
 
 /**
@@ -17,6 +18,7 @@ class VEHICLECOMBATGAMECPP_API ABase_GameMode : public AGameMode {
 
 	// Variables
   private:
+	UWidget_Gameplay *Widget_Gameplay;
 	// Level Boundary
 	FVector LevelBoundary1 = FVector(0, 0, 0);
 	FVector LevelBoundary2 = FVector(0, 0, 0);

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "WheeledVehicle.h"
 #include "Components/TimelineComponent.h"
+#include "Sound/SoundCue.h"
 #include "Base_DrivePawn.generated.h"
 
 class UPhysicalMaterial;
@@ -13,6 +14,8 @@ class USpringArmComponent;
 class UTextRenderComponent;
 class UInputComponent;
 class UAudioComponent;
+
+enum class HealthStageEnum : uint8 { Normal, Smoke, Fire, Explosion };
 
 UCLASS(config = Game)
 class ABase_DrivePawn : public AWheeledVehicle {
@@ -47,18 +50,14 @@ class ABase_DrivePawn : public AWheeledVehicle {
 	class UParticleSystemComponent *ExhaustParticles;
 
 	UPROPERTY(VisibleAnywhere)
-	class UParticleSystemComponent *HealthSmoke;
+	class UParticleSystemComponent *HealthParticles;
 
 	UPROPERTY(VisibleAnywhere)
-	class UParticleSystemComponent *HealthFire;
-
-	UPROPERTY(VisibleAnywhere)
-	class UParticleSystemComponent *HealthExplosion;
+	class UAudioComponent *HealthSound;
 
   public:
 	ABase_DrivePawn();
-	
-	
+
 	UPROPERTY(Category = Display, VisibleDefaultsOnly, BlueprintReadOnly)
 	FText SpeedDisplayString;
 
@@ -89,19 +88,26 @@ class ABase_DrivePawn : public AWheeledVehicle {
 	FVector InternalCameraOrigin;
 
 	UPROPERTY(Replicated)
-	class ATeam* Team;
+	class ATeam *Team;
 
   private:
 	// Update physics. Slippery = car on the roof (slide); NonSlippery = Normal driving
 	bool bIsLowFriction;
 	UPhysicalMaterial *SlipperyMaterial;
 	UPhysicalMaterial *NonSlipperyMaterial;
+	UParticleSystem *SmokeParticleSystem;
+	UParticleSystem *FireParticleSystem;
+	UParticleSystem *ExplosionParticleSystem;
+	USoundCue *SmokeSoundCue;
+	USoundCue *FireSoundCue;
+	USoundCue *ExplosionSoundCue;
 
 	// Mesh Color
-	UMaterialInstanceDynamic* SkeletonMeshMaterialInstance;
+	UMaterialInstanceDynamic *SkeletonMeshMaterialInstance;
 
 	// Health
 	float Health = 100;
+	HealthStageEnum HealthStage = HealthStageEnum::Normal;
 	bool IsCollidingWithKillPlane;
 
 	float CurrentDeltaSeconds;
@@ -129,17 +135,18 @@ class ABase_DrivePawn : public AWheeledVehicle {
 	/*UFUNCTION()
 	void ActorBeginOverlap1(class AActor* actor, class AActor* otherActor);*/
 	UFUNCTION()
-	void HandleOverlapStartEvent(class AActor* myActor, class AActor* otherActor);
+	void HandleOverlapStartEvent(class AActor *myActor, class AActor *otherActor);
 	UFUNCTION()
-	void HandleOverlapEndEvent(class AActor* myActor, class AActor* otherActor);
+	void HandleOverlapEndEvent(class AActor *myActor, class AActor *otherActor);
 	UFUNCTION()
-	void HandleHitEvent(UPrimitiveComponent* hitComponent, AActor* actor, UPrimitiveComponent* otherComponent, FVector normalImpulse, FHitResult& hit);
+	void HandleHitEvent(UPrimitiveComponent *hitComponent, AActor *actor, UPrimitiveComponent *otherComponent, FVector normalImpulse, FHitResult &hit);
 
 	// Used to initialize the car at spawn. Called only once at "BeginPlay"
 	void InitializeEventDelegates();
 	void InitializeBasicComponents();
 	void InitializeCar();
 	void InitializeParticleSystems();
+	void InitializeSoundCues();
 	void InitializeOtherComponents();
 	void InitializeFlipCarTimeline();
 
@@ -153,14 +160,28 @@ class ABase_DrivePawn : public AWheeledVehicle {
 	void FlipCar();
 
   public:
-    // Car Component Getter
-	FORCEINLINE USpringArmComponent *GetSpringArm() const { return SpringArm; }
-	FORCEINLINE UCameraComponent *GetCamera() const { return Camera; }
-	FORCEINLINE UCameraComponent *GetInternalCamera() const { return InternalCamera; }
-	FORCEINLINE UTextRenderComponent *GetInCarSpeed() const { return InCarSpeed; }
-	FORCEINLINE UTextRenderComponent *GetInCarGear() const { return InCarGear; }
-	FORCEINLINE UAudioComponent *GetEngineSoundComponent() const { return EngineSoundComponent; }
+	// Car Component Getter
+	FORCEINLINE USpringArmComponent *GetSpringArm() const {
+		return SpringArm;
+	}
+	FORCEINLINE UCameraComponent *GetCamera() const {
+		return Camera;
+	}
+	FORCEINLINE UCameraComponent *GetInternalCamera() const {
+		return InternalCamera;
+	}
+	FORCEINLINE UTextRenderComponent *GetInCarSpeed() const {
+		return InCarSpeed;
+	}
+	FORCEINLINE UTextRenderComponent *GetInCarGear() const {
+		return InCarGear;
+	}
+	FORCEINLINE UAudioComponent *GetEngineSoundComponent() const {
+		return EngineSoundComponent;
+	}
 
 	UFUNCTION(BlueprintCallable)
-	float GetHealth() { return Health; }
+	float GetHealth() {
+		return Health;
+	}
 };

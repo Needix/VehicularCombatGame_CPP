@@ -5,6 +5,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Kismet/GameplayStatics.h"
 #include "Landscape.h"
 #include "EngineUtils.h"
 #include "Engine/Engine.h"
@@ -12,12 +13,16 @@
 #include "Sound/SoundBase.h"
 #include "Sound/SoundCue.h"
 
+#include "UserWidget.h"
+#include "Widget.h"
 #include "Components/AudioComponent.h"
 
 #include "GameModes/Team.h"
 #include "AI/AI_DrivePawn.h"
 #include "AllLevel/LevelBoundary.h"
 #include "Helper/GeneralHelper.h"
+#include "AllLevel/Singleton.h"
+#include "UI/Widget_Gameplay.h"
 #include "Player/Player_DrivePawn.h"
 #include "Player/Player_Controller.h"
 
@@ -40,7 +45,17 @@ ABase_GameMode::ABase_GameMode() {
 }
 
 void ABase_GameMode::BeginPlay() {
+	TArray<AActor *> singletons;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASingleton::StaticClass(), singletons);
+	ASingleton *singleton = CastChecked<ASingleton>(singletons[0]);
+	check(singletons.Num() == 1);
+	APlayerController *playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 
+	Widget_Gameplay = CreateWidget<UWidget_Gameplay>(playerController, singleton->wGameplayWidget);
+	if (IsValid(Widget_Gameplay)) {
+		Widget_Gameplay->SetOwningPlayer(playerController);
+		Widget_Gameplay->AddToViewport(5000);
+}
 }
 
 void ABase_GameMode::Tick(float Delta) {
