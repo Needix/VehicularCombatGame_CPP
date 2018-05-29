@@ -9,6 +9,7 @@
 #include "Components/AudioComponent.h"
 #include "Components/TextRenderComponent.h"
 #include "Components/TimelineComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Curves/CurveFloat.h"
 
@@ -41,6 +42,12 @@ APlayer_DrivePawn::APlayer_DrivePawn() {
 
 void APlayer_DrivePawn::BeginPlay() {
 	Super::BeginPlay();
+
+	TArray<AActor *> singletons;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASingleton::StaticClass(), singletons);
+	check(singletons.Num() == 1);
+	Singleton = CastChecked<ASingleton>(singletons[0]);
+
 	bool bWantInCar = false;
 	// Enable in car view if HMD is attached
 #if HMD_MODULE_INCLUDED
@@ -97,6 +104,8 @@ void APlayer_DrivePawn::SetupPlayerInputComponent(class UInputComponent *PlayerI
 
 	PlayerInputComponent->BindAction("ConnectToServer", IE_Pressed, this, &APlayer_DrivePawn::OnJoinServer);
 	PlayerInputComponent->BindAction("HostServer", IE_Pressed, this, &APlayer_DrivePawn::OnHostServer);
+
+	PlayerInputComponent->BindAction("PauseMenu", IE_Pressed, this, &APlayer_DrivePawn::OnPauseMenu);
 }
 
 void APlayer_DrivePawn::MoveForward(float Val) {
@@ -127,6 +136,12 @@ void APlayer_DrivePawn::OnJoinServer() {
 	UE_LOG(LogTemp, Warning, TEXT("OnJoinServer for %i"), pc->NetPlayerIndex);
 	UMyGameInstance* gameInstance = CastChecked<UMyGameInstance>(GetGameInstance());
 	gameInstance->Join(pc->NetPlayerIndex);
+}
+
+void APlayer_DrivePawn::OnPauseMenu() {
+	APlayer_Controller *playerController = CastChecked<APlayer_Controller>(this->GetController());
+	playerController->SetInputMode(FInputModeUIOnly());
+	playerController->ChangeMenuWidget(Singleton->PauseMenuWidgetClass);
 }
 
 void APlayer_DrivePawn::UpdateHMDCamera() {

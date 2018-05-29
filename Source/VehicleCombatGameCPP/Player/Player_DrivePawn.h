@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/TimelineComponent.h"
+#include "AllLevel/Singleton.h"
 #include "Base/Base_DrivePawn.h"
 #include "Player_DrivePawn.generated.h"
 
@@ -41,6 +42,7 @@ class VEHICLECOMBATGAMECPP_API APlayer_DrivePawn : public ABase_DrivePawn {
 	void OnHorn();
 	void OnHostServer();
 	void OnJoinServer();
+	void OnPauseMenu();
 
 	virtual void SetupPlayerInputComponent(UInputComponent *InputComponent) override;
 	virtual void BeginPlay() override;
@@ -55,4 +57,5 @@ class VEHICLECOMBATGAMECPP_API APlayer_DrivePawn : public ABase_DrivePawn {
 	void EnableIncarView(const bool bState);
 	int CurrentCamera = 0;
 	FTransform OldCameraTransform;
+	ASingleton *Singleton;
 };
