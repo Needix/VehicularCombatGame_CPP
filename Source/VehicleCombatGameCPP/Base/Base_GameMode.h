@@ -4,9 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameMode.h"
-#include "Player/Player_Controller.h"
+
+#include "AI/AI_Controller.h"
 #include "GameModes/Team.h"
+#include "Player/Player_Controller.h"
 #include "UI/Widget_Gameplay.h"
+
 #include "Base_GameMode.generated.h"
 
 /**
@@ -55,5 +58,6 @@ class VEHICLECOMBATGAMECPP_API ABase_GameMode : public AGameMode {
 
 	float GetRespawnTime();
 
-	virtual UClass* GetAIPawnClass();
+	virtual TSubclassOf<ABase_DrivePawn> GetAIPawnClass();
+	virtual TSubclassOf<AAIController> GetAIControllerClass();
 };

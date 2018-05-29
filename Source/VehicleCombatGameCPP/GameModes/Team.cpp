@@ -20,6 +20,7 @@
 #include "AI/AI_Controller.h"
 #include "Helper/GeneralHelper.h"
 #include "Base/Base_GameMode.h"
+#include "Base/Base_GunPawn.h"
 #include "Player/Player_Controller.h"
 #include "Player/Player_DrivePawn.h"
 
@@ -220,7 +221,8 @@ ABase_DrivePawn *ATeam::SpawnCar(AController *controller, UClass *driveClass) {
 				} else {
 					controller->Possess(result);
 				}
-				result->Team = this;
+				result->GetGunPawn()->SpawnDefaultController();
+				result->SetTeam(this);
 				result->SetSkeletonColor(Color);
 
 				UE_LOG(LogTemp, Display, TEXT("Car spawned successfull for %s at location %f/%f/%f for team %s"), *controller->GetName(), randomX, randomY, currentLocation.Z, *this->GetName());

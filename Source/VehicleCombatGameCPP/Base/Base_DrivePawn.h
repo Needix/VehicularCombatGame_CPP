@@ -14,6 +14,7 @@ class USpringArmComponent;
 class UTextRenderComponent;
 class UInputComponent;
 class UAudioComponent;
+class ABase_GunPawn;
 
 enum class HealthStageEnum : uint8 { Normal, Smoke, Fire, Explosion };
 
@@ -45,6 +46,8 @@ class ABase_DrivePawn : public AWheeledVehicle {
 
 	UPROPERTY(Category = Display, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UAudioComponent *EngineSoundComponent;
+
+	ABase_GunPawn* GunPawn;
 
 	UPROPERTY(VisibleAnywhere)
 	class UParticleSystemComponent *ExhaustParticles;
@@ -87,9 +90,6 @@ class ABase_DrivePawn : public AWheeledVehicle {
 
 	FVector InternalCameraOrigin;
 
-	UPROPERTY(Replicated)
-	class ATeam *Team;
-
   private:
 	// Update physics. Slippery = car on the roof (slide); NonSlippery = Normal driving
 	bool bIsLowFriction;
@@ -112,6 +112,10 @@ class ABase_DrivePawn : public AWheeledVehicle {
 
 	float CurrentDeltaSeconds;
 
+	UPROPERTY(Replicated)
+	class ATeam *Team;
+
+	// Flip car
 	FRotator OldFlipCarRotation;
 	bool WhileFlipping;
 
@@ -149,6 +153,7 @@ class ABase_DrivePawn : public AWheeledVehicle {
 	void InitializeSoundCues();
 	void InitializeOtherComponents();
 	void InitializeFlipCarTimeline();
+	void InitializeTurretSpawn();
 
 	// These functions get called every frame and are used to update stuff
 	void UpdateHealth();
@@ -180,8 +185,22 @@ class ABase_DrivePawn : public AWheeledVehicle {
 		return EngineSoundComponent;
 	}
 
+	ATeam* GetTeam() {
+		return Team;
+	}
+	void SetTeam(ATeam* team) {
+		Team = team;
+	}
+
+	ABase_GunPawn* GetGunPawn() {
+		return GunPawn;
+	}
+
 	UFUNCTION(BlueprintCallable)
 	float GetHealth() {
 		return Health;
 	}
+	
+	void SetSteering(float steering);
+	void SetThrottle(float throttle);
 };

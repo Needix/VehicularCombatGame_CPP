@@ -3,8 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "Base/Base_GameMode.h"
 #include "GameModes/CTF/CTF_Flag.h"
+#include "AI/AI_CTF_Controller.h"
+
 #include "GameMode_CaptureTheFlag.generated.h"
 
 /**
@@ -27,6 +30,9 @@ class VEHICLECOMBATGAMECPP_API AGameMode_CaptureTheFlag : public ABase_GameMode
 		void SpawnFlag();
 
 		ACTF_Flag* getFlag() { return TheFlag; }
+		
 
-		UClass* GetAIPawnClass() override;
+		TSubclassOf<AAIController> GetAIControllerClass() override {
+			return AAI_CTF_Controller::StaticClass();
+		}
 };

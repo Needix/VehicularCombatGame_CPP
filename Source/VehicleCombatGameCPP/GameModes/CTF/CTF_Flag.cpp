@@ -77,7 +77,7 @@ void ACTF_Flag::BoxCollisionComponentOverlap(class AActor* myActor, class AActor
 		}
 		ATeam* team = CastChecked<ATeam>(otherActor);
 		ABase_DrivePawn* driver = CastChecked<ABase_DrivePawn>(GetOwner());
-		if(driver->Team == team) {
+		if(driver->GetTeam() == team) {
 			team->IncreasePoints(1);
 			Destroy();
 		}

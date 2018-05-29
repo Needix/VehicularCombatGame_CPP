@@ -23,14 +23,17 @@
 #include "Camera/CameraComponent.h"
 #include "Curves/CurveFloat.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "GameFramework/GameMode.h"
 
 // Custom Header
 #include "VehicleCombatGameCPPWheelFront.h"
 #include "VehicleCombatGameCPPWheelRear.h"
 #include "VehicleCombatGameCPPHud.h"
+#include "AI/AI_Controller.h"
 #include "AllLevel/KillPlane.h"
-#include "Helper/GeneralHelper.h"
+#include "Base/Base_GameMode.h"
 #include "GameModes/Team.h"
+#include "Helper/GeneralHelper.h"
 
 // Needed for VR Headset
 #if HMD_MODULE_INCLUDED
@@ -38,11 +41,21 @@
 #include "HeadMountedDisplayFunctionLibrary.h"
 #endif // HMD_MODULE_INCLUDED
 
+
+#include "Base_GunPawn.h"
+
 const FName ABase_DrivePawn::EngineAudioRPM("RPM");
 
 #define LOCTEXT_NAMESPACE "VehiclePawn"
 
 ABase_DrivePawn::ABase_DrivePawn() {
+	if(HasAuthority() && IsValid(GetWorld())) {
+		AGameModeBase* gm = GetWorld()->GetAuthGameMode();
+		if(IsValid(gm) && gm->GetClass()->IsChildOf(ABase_GameMode::StaticClass())) {
+			AIControllerClass = CastChecked<ABase_GameMode>(gm)->GetAIControllerClass();
+		}
+	}
+
 	bReplicates = true;
 	bAlwaysRelevant = true;
 
@@ -72,6 +85,8 @@ ABase_DrivePawn::ABase_DrivePawn() {
 
 void ABase_DrivePawn::BeginPlay() {
 	Super::BeginPlay();
+
+	InitializeTurretSpawn();
 
 	// First disable both speed/gear displays
 	bInCarCameraActive = false;
@@ -133,7 +148,6 @@ void ABase_DrivePawn::InitializeParticleSystems() {
 	HealthParticles->bAutoActivate = false;
 	HealthParticles->SetupAttachment(GetMesh());
 }
-
 void ABase_DrivePawn::InitializeSoundCues() {
 	static ConstructorHelpers::FObjectFinder<USoundCue> SmokeSound(TEXT("SoundCue'/Game/StarterContent/Audio/Smoke01_Cue.Smoke01_Cue'"));
 	static ConstructorHelpers::FObjectFinder<USoundCue> FireSound(TEXT("SoundCue'/Game/StarterContent/Audio/Fire01_Cue.Fire01_Cue'"));
@@ -147,7 +161,6 @@ void ABase_DrivePawn::InitializeSoundCues() {
 	HealthSound->bAutoActivate = false;
 	HealthSound->SetupAttachment(GetMesh());
 }
-
 void ABase_DrivePawn::InitializeCar() {
 	UWheeledVehicleMovementComponent4W *Vehicle4W = CastChecked<UWheeledVehicleMovementComponent4W>(GetVehicleMovement());
 
@@ -275,7 +288,6 @@ void ABase_DrivePawn::InitializeOtherComponents() {
 	TopDownCamera->bUsePawnControlRotation = false;
 	TopDownCamera->FieldOfView = 90.f;
 }
-
 void ABase_DrivePawn::InitializeFlipCarTimeline() {
 	static ConstructorHelpers::FObjectFinder<UCurveFloat> Curve(TEXT("CurveFloat'/Game/VehicularCombatGame/Curves/Linear.Linear'"));
 
@@ -292,6 +304,13 @@ void ABase_DrivePawn::InitializeFlipCarTimeline() {
 	FlipCarTimeline->SetTimelineFinishedFunc(onFinishedCallback);
 
 	FlipCarTimeline->RegisterComponent();
+}
+void ABase_DrivePawn::InitializeTurretSpawn() {
+	FActorSpawnParameters spawnParameters = FActorSpawnParameters();
+	spawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	GunPawn = GetWorld()->SpawnActor<ABase_GunPawn>(ABase_GunPawn::StaticClass(), FTransform(FVector(this->GetActorLocation().X, this->GetActorLocation().Y, this->GetActorLocation().Z + 5000)), spawnParameters);
+	FAttachmentTransformRules transformRules = FAttachmentTransformRules(EAttachmentRule::SnapToTarget, false);
+	GunPawn->AttachToActor(this, transformRules, "TurretSocket");
 }
 
 void ABase_DrivePawn::Tick(float Delta) {
@@ -434,6 +453,7 @@ void ABase_DrivePawn::UpdateHealth() {
 				HealthSound->SetSound(ExplosionSoundCue);
 				HealthSound->Activate();
 
+				GetGunPawn()->Destroy();
 				DestroyCar();// TODO: Use timer to be able to see and hear the explosion
 				break;
 		}
@@ -487,6 +507,13 @@ void ABase_DrivePawn::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & O
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
  
     DOREPLIFETIME(ABase_DrivePawn, Team);
+}
+
+void ABase_DrivePawn::SetSteering(float steering) {
+	GetVehicleMovement()->SetSteeringInput(steering);
+}
+void ABase_DrivePawn::SetThrottle(float throttle) {
+	GetVehicleMovement()->SetThrottleInput(throttle);
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -19,6 +19,7 @@
 
 #include "GameModes/Team.h"
 #include "AI/AI_DrivePawn.h"
+#include "AI/AI_Controller.h"
 #include "AllLevel/LevelBoundary.h"
 #include "Helper/GeneralHelper.h"
 #include "AllLevel/Singleton.h"
@@ -154,6 +155,9 @@ float ABase_GameMode::GetMinY() { return UKismetMathLibrary::Min( LevelBoundary1
 float ABase_GameMode::GetRespawnTime() {
 	return CONST_DeathRespawnTime;
 }
-UClass* ABase_GameMode::GetAIPawnClass() {
+TSubclassOf<ABase_DrivePawn> ABase_GameMode::GetAIPawnClass() {
 	return AAI_DrivePawn::StaticClass();
+}
+TSubclassOf<AAIController> ABase_GameMode::GetAIControllerClass() {
+	return AAI_Controller::StaticClass();
 }
