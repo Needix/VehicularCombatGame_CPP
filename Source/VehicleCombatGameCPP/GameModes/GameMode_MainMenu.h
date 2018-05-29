@@ -11,15 +11,10 @@ class VEHICLECOMBATGAMECPP_API AGameMode_MainMenu : public AGameMode {
 
   public:
 	AGameMode_MainMenu();
-	UFUNCTION(BlueprintCallable, Category = "UMG Game")
-	void ChangeMenuWidget(TSubclassOf<UUserWidget> newWidgetClass);
 
   protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UMG Game")
 	TSubclassOf<UUserWidget> StartingWidgetClass;
-
-	UPROPERTY()
-	UUserWidget *CurrentWidget;
 };

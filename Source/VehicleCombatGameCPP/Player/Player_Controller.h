@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "Blueprint/UserWidget.h"
 #include "GameModes/Team.h"
 #include "Player_Controller.generated.h"
 
@@ -17,8 +18,14 @@ class VEHICLECOMBATGAMECPP_API APlayer_Controller : public APlayerController {
 	public:
 		ATeam* Team;
 		float RespawnTimer = 50000;
+		
+		UFUNCTION(BlueprintCallable, Category = "UMG Game")
+		void ChangeMenuWidget(TSubclassOf<UUserWidget> newWidgetClass);
+	
+	protected:
+		UPROPERTY()
+		UUserWidget *CurrentWidget;
 	
 	public:
-		virtual void BeginPlay() override;
 		virtual void Tick(float Delta) override;
 };
