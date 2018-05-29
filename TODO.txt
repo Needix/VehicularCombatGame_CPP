@@ -2,9 +2,6 @@ Bugs:
 	Team:
 		- Dont spawn teams too close to each other
 	
-	Base_GunPawn:
-		- Move gun down (and disable collision!)
-	
 	Base_DrivePawn:
 		- 
 		

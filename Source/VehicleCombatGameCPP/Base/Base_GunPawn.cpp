@@ -42,10 +42,11 @@ void ABase_GunPawn::SetupComponents() {
 
 	UStaticMeshComponent* base = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Base"));
 	base->SetStaticMesh(cube.Object);
-	base->SetRelativeLocation(FVector(0, 0, 40));
+	base->SetRelativeLocation(FVector(0, 0, 0));
 	base->SetRelativeScale3D(FVector(0.4, 0.4, 0.01));
 	base->SetMaterial(0, SkeletonMeshMaterialInstance);
 	base->SetupAttachment(RootComponent);
+	base->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	YawBase = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RotatingCylinder"));
 	YawBase->SetStaticMesh(cylinder.Object);
@@ -53,6 +54,7 @@ void ABase_GunPawn::SetupComponents() {
 	YawBase->SetRelativeScale3D(FVector(1, 1, 1));
 	YawBase->SetMaterial(0, SkeletonMeshMaterialInstance);
 	YawBase->SetupAttachment(base);
+	YawBase->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	// Scene 1
 	USceneComponent* sceneComponent1 = CreateDefaultSubobject<USceneComponent>(TEXT("Scene1"));
@@ -66,13 +68,15 @@ void ABase_GunPawn::SetupComponents() {
 	cube1->SetRelativeScale3D(FVector(1, 1, 1));
 	cube1->SetMaterial(0, SkeletonMeshMaterialInstance);
 	cube1->SetupAttachment(sceneComponent1);
+	cube1->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	
 	UStaticMeshComponent* cube2 = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Cube2"));
 	cube2->SetStaticMesh(cube.Object);
 	cube2->SetRelativeLocation(FVector(0, -400, 0));
 	cube2->SetRelativeScale3D(FVector(1, 1, 1));
-	base->SetMaterial(0, SkeletonMeshMaterialInstance);
+	cube2->SetMaterial(0, SkeletonMeshMaterialInstance);
 	cube2->SetupAttachment(sceneComponent1);
+	cube2->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	
 	// Scene 2
 	USceneComponent* sceneComponent2 = CreateDefaultSubobject<USceneComponent>(TEXT("Scene2"));
@@ -88,6 +92,7 @@ void ABase_GunPawn::SetupComponents() {
 	barrelBase->SetRelativeScale3D(FVector(0.1, 0.1, 30));
 	barrelBase->SetMaterial(0, SkeletonMeshMaterialInstance);
 	barrelBase->SetupAttachment(sceneComponent2);
+	barrelBase->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	PitchBase = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Barrel"));
 	PitchBase->SetStaticMesh(cylinder.Object);
@@ -96,6 +101,7 @@ void ABase_GunPawn::SetupComponents() {
 	PitchBase->SetRelativeScale3D(FVector(0.2, 0.2, 50));
 	PitchBase->SetMaterial(0, SkeletonMeshMaterialInstance);
 	PitchBase->SetupAttachment(sceneComponent2);
+	PitchBase->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	UStaticMeshComponent* barrelInsde = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BarrelInside"));
 	barrelInsde->SetStaticMesh(cylinder.Object);
@@ -104,6 +110,7 @@ void ABase_GunPawn::SetupComponents() {
 	barrelInsde->SetRelativeScale3D(FVector(0.5, 0.5, 0.9));
 	barrelInsde->SetMaterial(0, SkeletonMeshMaterialInstance);
 	barrelInsde->SetupAttachment(PitchBase);
+	barrelInsde->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 // Called when the game starts or when spawned
