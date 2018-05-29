@@ -311,6 +311,7 @@ void ABase_DrivePawn::InitializeTurretSpawn() {
 	GunPawn = GetWorld()->SpawnActor<ABase_GunPawn>(ABase_GunPawn::StaticClass(), FTransform(FVector(this->GetActorLocation().X, this->GetActorLocation().Y, this->GetActorLocation().Z + 5000)), spawnParameters);
 	FAttachmentTransformRules transformRules = FAttachmentTransformRules(EAttachmentRule::SnapToTarget, false);
 	GunPawn->AttachToActor(this, transformRules, "TurretSocket");
+	GunPawn->SetDrivePawn(this);
 }
 
 void ABase_DrivePawn::Tick(float Delta) {
@@ -404,6 +405,13 @@ void ABase_DrivePawn::DecreaseHealthByFloat(float health) {
 
 	if (Health <= 0) {
 		Health = 0;
+	}
+}
+void ABase_DrivePawn::IncreaseHealthByFloat(float amount) {
+	Health += amount;
+
+	if(Health >= 100) {
+		Health = 100;
 	}
 }
 void ABase_DrivePawn::UpdateHealth() {

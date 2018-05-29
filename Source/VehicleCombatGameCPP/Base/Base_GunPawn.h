@@ -4,6 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+
+#include "Base/Base_Item.h"
+
 #include "Base_GunPawn.generated.h"
 
 UCLASS()
@@ -19,6 +22,10 @@ class VEHICLECOMBATGAMECPP_API ABase_GunPawn : public APawn {
 	static const FName LookRightBinding;
 
 	bool IsPrimaryFiring;
+
+	ABase_Item* Item;
+
+	class ABase_DrivePawn* DrivePawn;
 
   private:
 	void SetupComponents();
@@ -48,4 +55,15 @@ class VEHICLECOMBATGAMECPP_API ABase_GunPawn : public APawn {
 
 
 	void SetColor(FVector color);
+
+	void SetItem(ABase_Item* item) {
+		Item = item;
+	}
+
+	ABase_DrivePawn* GetDrivePawn() {
+		return DrivePawn;
+	}
+	void SetDrivePawn(ABase_DrivePawn* pawn) {
+		DrivePawn = pawn;
+	}
 };

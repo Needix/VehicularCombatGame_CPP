@@ -47,8 +47,6 @@ class ABase_DrivePawn : public AWheeledVehicle {
 	UPROPERTY(Category = Display, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UAudioComponent *EngineSoundComponent;
 
-	ABase_GunPawn* GunPawn;
-
 	UPROPERTY(VisibleAnywhere)
 	class UParticleSystemComponent *ExhaustParticles;
 
@@ -59,8 +57,6 @@ class ABase_DrivePawn : public AWheeledVehicle {
 	class UAudioComponent *HealthSound;
 
   public:
-	ABase_DrivePawn();
-
 	UPROPERTY(Category = Display, VisibleDefaultsOnly, BlueprintReadOnly)
 	FText SpeedDisplayString;
 
@@ -91,6 +87,8 @@ class ABase_DrivePawn : public AWheeledVehicle {
 	FVector InternalCameraOrigin;
 
   private:
+	ABase_GunPawn* GunPawn;
+
 	// Update physics. Slippery = car on the roof (slide); NonSlippery = Normal driving
 	bool bIsLowFriction;
 	UPhysicalMaterial *SlipperyMaterial;
@@ -120,11 +118,14 @@ class ABase_DrivePawn : public AWheeledVehicle {
 	bool WhileFlipping;
 
   public:
+	ABase_DrivePawn();
+
 	virtual void Tick(float Delta) override;
 
 	void SetSkeletonColor(FVector color);
 
 	// Interact with the car health
+	void IncreaseHealthByFloat(float amount);
 	void DecreaseHealthByTime(float deltaSecondsMultiplicator);
 	void DecreaseHealthByFloat(float health);
 	void DestroyCar();

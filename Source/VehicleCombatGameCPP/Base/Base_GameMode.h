@@ -6,6 +6,7 @@
 #include "GameFramework/GameMode.h"
 
 #include "AI/AI_Controller.h"
+#include "Base/Base_ItemSpawner.h"
 #include "GameModes/Team.h"
 #include "Player/Player_Controller.h"
 #include "UI/Widget_Gameplay.h"
@@ -29,6 +30,8 @@ class VEHICLECOMBATGAMECPP_API ABase_GameMode : public AGameMode {
 
 	// Color
 	TArray<FVector> TeamColors; 
+
+	ABase_ItemSpawner* ItemSpawner;
 
   public:
 	const static int CONST_DeathRespawnTime = 3;
@@ -60,4 +63,5 @@ class VEHICLECOMBATGAMECPP_API ABase_GameMode : public AGameMode {
 
 	virtual TSubclassOf<ABase_DrivePawn> GetAIPawnClass();
 	virtual TSubclassOf<AAIController> GetAIControllerClass();
+	virtual TSubclassOf<ABase_ItemSpawner> GetItemSpawnerClass();
 };

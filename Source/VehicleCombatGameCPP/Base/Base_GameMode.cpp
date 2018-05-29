@@ -46,17 +46,22 @@ ABase_GameMode::ABase_GameMode() {
 }
 
 void ABase_GameMode::BeginPlay() {
+	// Create UI Widget
 	TArray<AActor *> singletons;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASingleton::StaticClass(), singletons);
-	ASingleton *singleton = CastChecked<ASingleton>(singletons[0]);
 	check(singletons.Num() == 1);
+	ASingleton *singleton = CastChecked<ASingleton>(singletons[0]);
 	APlayerController *playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-
 	Widget_Gameplay = CreateWidget<UWidget_Gameplay>(playerController, singleton->wGameplayWidget);
 	if (IsValid(Widget_Gameplay)) {
 		Widget_Gameplay->SetOwningPlayer(playerController);
 		Widget_Gameplay->AddToViewport(5000);
-}
+	}
+
+	// Spawn Item Spawner
+	FActorSpawnParameters spawnParameters = FActorSpawnParameters();
+	spawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	ItemSpawner = GetWorld()->SpawnActor<ABase_ItemSpawner>(GetItemSpawnerClass(), spawnParameters);
 }
 
 void ABase_GameMode::Tick(float Delta) {
@@ -160,4 +165,7 @@ TSubclassOf<ABase_DrivePawn> ABase_GameMode::GetAIPawnClass() {
 }
 TSubclassOf<AAIController> ABase_GameMode::GetAIControllerClass() {
 	return AAI_Controller::StaticClass();
+}
+TSubclassOf<ABase_ItemSpawner> ABase_GameMode::GetItemSpawnerClass() {
+	return ABase_ItemSpawner::StaticClass();
 }
