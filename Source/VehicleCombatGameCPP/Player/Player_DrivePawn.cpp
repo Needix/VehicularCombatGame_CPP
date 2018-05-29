@@ -26,7 +26,7 @@ const FName APlayer_DrivePawn::LookUpBinding("LookUp");
 const FName APlayer_DrivePawn::LookRightBinding("LookRight");
 
 APlayer_DrivePawn::APlayer_DrivePawn() {
-	//Super::Super();
+	// Super::Super();
 	static ConstructorHelpers::FObjectFinder<USoundCue> SoundCue(TEXT("/Game/VehicularCombatGame/Sound/Horn.Horn"));
 	HornSoundComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("HornSound"));
 	HornSoundComponent->bAutoActivate = false;
@@ -125,16 +125,16 @@ void APlayer_DrivePawn::OnHandbrakeReleased() {
 }
 
 void APlayer_DrivePawn::OnHostServer() {
-	APlayer_Controller* pc = CastChecked<APlayer_Controller>(this->GetController());
+	APlayer_Controller *pc = CastChecked<APlayer_Controller>(this->GetController());
 	UE_LOG(LogTemp, Warning, TEXT("OnHostServer for %i"), pc->NetPlayerIndex);
-	UMyGameInstance* gameInstance = CastChecked<UMyGameInstance>(GetGameInstance());
+	UMyGameInstance *gameInstance = CastChecked<UMyGameInstance>(GetGameInstance());
 	gameInstance->Host(pc->NetPlayerIndex);
 }
 
 void APlayer_DrivePawn::OnJoinServer() {
-	APlayer_Controller* pc = CastChecked<APlayer_Controller>(this->GetController());
+	APlayer_Controller *pc = CastChecked<APlayer_Controller>(this->GetController());
 	UE_LOG(LogTemp, Warning, TEXT("OnJoinServer for %i"), pc->NetPlayerIndex);
-	UMyGameInstance* gameInstance = CastChecked<UMyGameInstance>(GetGameInstance());
+	UMyGameInstance *gameInstance = CastChecked<UMyGameInstance>(GetGameInstance());
 	gameInstance->Join(pc->NetPlayerIndex);
 }
 
