@@ -124,6 +124,7 @@ bool UVideoSettings::SetVSyncEnabled(const bool vSync) {
 	}
 
 	settings->SetVSyncEnabled(vSync);
+	settings->ApplyNonResolutionSettings();
 
 	return true;
 }
