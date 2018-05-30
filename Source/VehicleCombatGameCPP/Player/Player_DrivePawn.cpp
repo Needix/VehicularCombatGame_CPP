@@ -21,6 +21,7 @@
 
 #include "Player/Player_Controller.h"
 #include "AllLevel/MyGameInstance.h"
+#include "Base/Base_Pawn.h"
 
 const FName APlayer_DrivePawn::LookUpBinding("LookUp");
 const FName APlayer_DrivePawn::LookRightBinding("LookRight");
@@ -94,6 +95,8 @@ void APlayer_DrivePawn::SetupPlayerInputComponent(class UInputComponent *PlayerI
 	PlayerInputComponent->BindAxis("MoveRight", this, &APlayer_DrivePawn::MoveRight);
 	PlayerInputComponent->BindAxis(LookUpBinding);
 	PlayerInputComponent->BindAxis(LookRightBinding);
+	
+	PlayerInputComponent->BindAction("SwitchRole", IE_Released, this, &APlayer_DrivePawn::OnSwitchRole);
 
 	PlayerInputComponent->BindAction("Handbrake", IE_Pressed, this, &APlayer_DrivePawn::OnHandbrakePressed);
 	PlayerInputComponent->BindAction("Handbrake", IE_Released, this, &APlayer_DrivePawn::OnHandbrakeReleased);
@@ -106,6 +109,10 @@ void APlayer_DrivePawn::SetupPlayerInputComponent(class UInputComponent *PlayerI
 	PlayerInputComponent->BindAction("HostServer", IE_Pressed, this, &APlayer_DrivePawn::OnHostServer);
 
 	PlayerInputComponent->BindAction("PauseMenu", IE_Pressed, this, &APlayer_DrivePawn::OnPauseMenu);
+}
+
+void APlayer_DrivePawn::OnSwitchRole() {
+	Base_Pawn::SwitchRoles(this, GunPawn);
 }
 
 void APlayer_DrivePawn::MoveForward(float Val) {

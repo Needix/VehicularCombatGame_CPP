@@ -5,6 +5,9 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 
+#include "Components/StaticMeshComponent.h"
+#include "Camera/CameraComponent.h"
+
 #include "Base/Base_Item.h"
 
 #include "Base_GunPawn.generated.h"
@@ -14,9 +17,28 @@ class VEHICLECOMBATGAMECPP_API ABase_GunPawn : public APawn {
 	GENERATED_BODY()
 
   private:
-	UMaterialInstanceDynamic* SkeletonMeshMaterialInstance;
+	UPROPERTY(VisibleAnywhere)
+	UStaticMeshComponent* base;
+	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* YawBase;
-	UStaticMeshComponent* PitchBase;
+	UPROPERTY(VisibleAnywhere)
+	USceneComponent* sceneComponent1;
+	UPROPERTY(VisibleAnywhere)
+	UStaticMeshComponent* cube1;
+	UPROPERTY(VisibleAnywhere)
+	UStaticMeshComponent* cube2;
+	UPROPERTY(VisibleAnywhere)
+	USceneComponent* PitchBase;
+	UPROPERTY(VisibleAnywhere)
+	UStaticMeshComponent* barrelBase;
+	UPROPERTY(VisibleAnywhere)
+	UCameraComponent* cameraComponent;
+	UPROPERTY(VisibleAnywhere)
+	UStaticMeshComponent* Barrel;
+	UPROPERTY(VisibleAnywhere)
+	UStaticMeshComponent* barrelInsde;
+	UPROPERTY(VisibleAnywhere)
+	UMaterialInstanceDynamic* SkeletonMeshMaterialInstance;
 
 	static const FName LookUpBinding;
 	static const FName LookRightBinding;

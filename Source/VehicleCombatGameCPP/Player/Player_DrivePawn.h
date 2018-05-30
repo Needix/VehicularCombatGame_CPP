@@ -43,6 +43,7 @@ class VEHICLECOMBATGAMECPP_API APlayer_DrivePawn : public ABase_DrivePawn {
 	void OnHostServer();
 	void OnJoinServer();
 	void OnPauseMenu();
+	void OnSwitchRole();
 
 	virtual void SetupPlayerInputComponent(UInputComponent *InputComponent) override;
 	virtual void BeginPlay() override;

@@ -87,8 +87,6 @@ class ABase_DrivePawn : public AWheeledVehicle {
 	FVector InternalCameraOrigin;
 
   private:
-	ABase_GunPawn* GunPawn;
-
 	// Update physics. Slippery = car on the roof (slide); NonSlippery = Normal driving
 	bool bIsLowFriction;
 	UPhysicalMaterial *SlipperyMaterial;
@@ -116,6 +114,9 @@ class ABase_DrivePawn : public AWheeledVehicle {
 	// Flip car
 	FRotator OldFlipCarRotation;
 	bool WhileFlipping;
+
+  protected:
+	ABase_GunPawn* GunPawn;
 
   public:
 	ABase_DrivePawn();
