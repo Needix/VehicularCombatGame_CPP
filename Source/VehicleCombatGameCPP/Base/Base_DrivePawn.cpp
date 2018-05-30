@@ -13,6 +13,7 @@
 
 // Components Header
 #include "Components/SkeletalMeshComponent.h"
+#include "Components/SpotLightComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/InputComponent.h"
 #include "Components/TextRenderComponent.h"
@@ -228,6 +229,16 @@ void ABase_DrivePawn::InitializeCar() {
 	Vehicle4W->InertiaTensorScale = FVector(1.0f, 1.333f, 1.2f);
 }
 void ABase_DrivePawn::InitializeOtherComponents() {
+	Spotlight = CreateDefaultSubobject<USpotLightComponent>(TEXT("SpotlightRight"));
+	Spotlight->SetRelativeLocation(FVector(80, 0, 20));
+	Spotlight->SetIntensity(50);
+	Spotlight->SetOuterConeAngle(30);
+	Spotlight->IntensityUnits = ELightUnits::Lumens;
+	Spotlight->SetAttenuationRadius(16000);
+	Spotlight->bUseInverseSquaredFalloff = false;
+	Spotlight->SetLightFalloffExponent(8);
+	Spotlight->SetupAttachment(RootComponent);
+
 	// Create a spring arm component for our chase camera
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetRelativeLocation(FVector(0.0f, 0.0f, 34.0f));

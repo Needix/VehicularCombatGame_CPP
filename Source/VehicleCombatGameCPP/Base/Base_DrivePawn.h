@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "WheeledVehicle.h"
 #include "Components/TimelineComponent.h"
+#include "Components/SpotLightComponent.h"
 #include "Sound/SoundCue.h"
 #include "Base_DrivePawn.generated.h"
 
@@ -46,6 +47,9 @@ class ABase_DrivePawn : public AWheeledVehicle {
 
 	UPROPERTY(Category = Display, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UAudioComponent *EngineSoundComponent;
+	
+	UPROPERTY(Category = Light, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	USpotLightComponent* Spotlight;
 
 	UPROPERTY(VisibleAnywhere)
 	class UParticleSystemComponent *ExhaustParticles;
