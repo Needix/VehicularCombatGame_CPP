@@ -181,7 +181,8 @@ void ATeam::AddPlayer(APlayer_Controller* controller) {
 	} else {
 		if(IsValid(TeamPlayer[aiIndex])) {
 			// TODO: Destroy the pawn only (so "explosion" is triggered)
-			TeamPlayer[aiIndex]->Destroy();
+			ABase_DrivePawn* pawn = CastChecked<ABase_DrivePawn>(TeamPlayer[aiIndex]->GetPawn());
+			pawn->DecreaseHealthByFloat(pawn->GetHealth());
 		}
 		TeamPlayer[aiIndex] = controller; // Replace the index with the new controller
 	}

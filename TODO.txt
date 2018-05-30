@@ -18,7 +18,6 @@ Bugs:
 		- Color the turret in team color
 	
 	Base_GameMode:
-		- GameMode leaves empty cars
 		
 	CTF_Flag:
 		- Slow down the car holding the flag
