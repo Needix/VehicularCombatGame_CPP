@@ -15,7 +15,6 @@ Bugs:
 	
 	Base_Gunpawn:
 		- Position gets reset after death (gunner seat -> Death -> driver seat)
-		- Color the turret in team color
 	
 	Base_GameMode:
 		

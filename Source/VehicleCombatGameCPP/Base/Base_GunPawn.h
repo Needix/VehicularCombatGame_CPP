@@ -7,6 +7,7 @@
 
 #include "Components/StaticMeshComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Materials/MaterialInstanceDynamic.h"
 
 #include "Base/Base_Item.h"
 
@@ -88,5 +89,9 @@ class VEHICLECOMBATGAMECPP_API ABase_GunPawn : public APawn {
 	}
 	void SetDrivePawn(ABase_DrivePawn* pawn) {
 		DrivePawn = pawn;
+	}
+
+	UMaterialInstanceDynamic* GetMaterial() {
+		return SkeletonMeshMaterialInstance;
 	}
 };

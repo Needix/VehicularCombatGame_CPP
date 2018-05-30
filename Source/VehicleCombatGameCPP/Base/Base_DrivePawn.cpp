@@ -509,6 +509,7 @@ void ABase_DrivePawn::FlipCarTimelineFinishedCallback() {
 
 void ABase_DrivePawn::SetSkeletonColor(FVector color) {
 	SkeletonMeshMaterialInstance->SetVectorParameterValue("DiffuseColor", FLinearColor(color.X, color.Y, color.Z, 0));
+	GunPawn->GetMaterial()->SetVectorParameterValue("DiffuseColor", FLinearColor(color.X, color.Y, color.Z, 0));
 }
 
 void ABase_DrivePawn::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const {
