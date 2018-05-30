@@ -28,9 +28,9 @@ ACTF_Flag::ACTF_Flag() {
 	particleSystemComponent->SetTemplate(particleSystem.Object);
 	particleSystemComponent->SetupAttachment(RootComponent);
 
-	UBoxComponent* boxCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollision"));
+	boxCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollision"));
 	boxCollision->SetRelativeLocation(FVector(0, 0, 150));
-	boxCollision->SetRelativeScale3D(FVector(2, 2, 7));
+	boxCollision->SetRelativeScale3D(FVector(3, 3, 7));
 	boxCollision->SetupAttachment(RootComponent);
 
 	FScriptDelegate componentOverlapDelegate;
@@ -50,29 +50,32 @@ void ACTF_Flag::BeginPlay() {
 // Called every frame
 void ACTF_Flag::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
+
+	ReattachTimer += DeltaTime;
+	if(ReattachTimer > 1) {
+		boxCollision->bGenerateOverlapEvents = true;
+	} else {
+		boxCollision->bGenerateOverlapEvents = false;
+	}
 }
 
 void ACTF_Flag::BoxCollisionComponentOverlap(class AActor* myActor, class AActor* otherActor) {
 	UClass* otherActorClass = otherActor->GetClass();
 	if(otherActorClass->IsChildOf(ABase_DrivePawn::StaticClass())) { // Potential Player pick up
-		//if(IsValid(GetOwner())) { // Do not pickup if already picked up
-		//	return;
-		//}
-		EDetachmentRule detachmentRule = EDetachmentRule::KeepWorld;
-		FDetachmentTransformRules detachmentRules = FDetachmentTransformRules(detachmentRule, true);
-		RootComponent->DetachFromComponent(detachmentRules);
-
-		if(IsValid(this->GetParentActor())) {
-			this->GetParentActor()->ResetOwnedComponents();
+		if(DrivePawn == myActor && ReattachTimer < 1) {
+			return;
 		}
-		SetOwner(otherActor);
 
-		ABase_DrivePawn* driver = CastChecked<ABase_DrivePawn>(otherActor);
+		DrivePawn = CastChecked<ABase_DrivePawn>(otherActor);
 		EAttachmentRule attachmentRule = EAttachmentRule::SnapToTarget;
-		FAttachmentTransformRules attachmentRules = FAttachmentTransformRules(attachmentRule, false);
-		RootComponent->AttachToComponent(driver->GetRootComponent(), attachmentRules);
+		FAttachmentTransformRules attachmentRules = FAttachmentTransformRules(attachmentRule, true);
+		UE_LOG(LogTemp, Warning, TEXT("Attaching %s to %s"), *this->GetName(), *DrivePawn->GetName());
+		ReattachTimer = 0;
+		boxCollision->bGenerateOverlapEvents = false;
+		this->AttachToActor(DrivePawn, attachmentRules);
 	} else if(otherActorClass->IsChildOf(ATeam::StaticClass())) { // Delivered to base?
-		if(!IsValid(GetOwner())) {
+		if(true) return;
+		if(!IsValid(DrivePawn)) {
 			return;
 		}
 		ATeam* team = CastChecked<ATeam>(otherActor);

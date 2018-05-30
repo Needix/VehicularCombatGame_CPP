@@ -24,7 +24,7 @@ void AAI_CTF_Controller::HandleGunPawn(ABase_GunPawn* pawn) {
 
 
 void AAI_CTF_Controller::SetThrottle(ABase_DrivePawn* myPawn, ACTF_Flag* flag) {
-	if(flag->GetOwner() == myPawn) {
+	if(flag->GetDrivePawn() == myPawn) {
 		Super::SetThrottle(myPawn->GetTeam());
 	} else {
 		Super::SetThrottle(flag);
@@ -32,7 +32,7 @@ void AAI_CTF_Controller::SetThrottle(ABase_DrivePawn* myPawn, ACTF_Flag* flag) {
 }
 
 void AAI_CTF_Controller::SetSteering(ABase_DrivePawn* myPawn, ACTF_Flag* flag) {
-	if(flag->GetOwner() == myPawn) {
+	if(flag->GetDrivePawn() == myPawn) {
 		Super::SetSteering(myPawn->GetTeam());
 	} else {
 		Super::SetSteering(flag);

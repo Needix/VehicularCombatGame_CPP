@@ -4,15 +4,19 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Components/BoxComponent.h"
 #include "CTF_Flag.generated.h"
 
 UCLASS()
-class VEHICLECOMBATGAMECPP_API ACTF_Flag : public AActor
-{
+class VEHICLECOMBATGAMECPP_API ACTF_Flag : public AActor {
 	GENERATED_BODY()
 	
-//private:
-	
+private:
+	UBoxComponent* boxCollision;
+
+	class ABase_DrivePawn* DrivePawn;
+
+	float ReattachTimer;
 
 protected:
 	// Called when the game starts or when spawned
@@ -23,6 +27,10 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	
+	ABase_DrivePawn* GetDrivePawn() {
+		return DrivePawn;
+	}
+
 	UFUNCTION()
 	void BoxCollisionComponentOverlap(class AActor* myActor, class AActor* otherActor);
 	

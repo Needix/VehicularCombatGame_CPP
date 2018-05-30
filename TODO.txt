@@ -1,17 +1,41 @@
 Bugs:
+	LogTimeline: SetPlaybackPosition: No float property 'None' in 'AI_DrivePawn_6'
+
+	GameMode:
+		- Spawn locations sometimes fail (fall though floor)
+	
 	Team:
 		- Dont spawn teams too close to each other
 	
+	AI:
+		- AI should pickup items in range
+	
 	Base_DrivePawn:
 		- 
-		
+	
+	Base_Gunpawn:
+		- Position gets reset after death (gunner seat -> Death -> driver seat)
+		- Color the turret in team color
+	
 	Base_GameMode:
 		- GameMode leaves empty cars
 		
+	CTF_Flag:
+		- Slow down the car holding the flag
+		- Keep particle system active for a little bit before destroy (so the smoke does not immediatly vanish)
+		- Put the floor to the ground if it detaches in the air (e.g. car with flag gets destroyed in midair)
+		
+	UI:
+		- Healthbar not working sometimes:
+			- Random
+			- In gunner seat
+			
+	World Boundary:
+		- Reposition world boundaries
+		- Add world walls
+		
 Features:
 	Items:
-		- Health (Instant, but less powerful)
-		- Health (OverTime, but more powerful)
 		- Minigun
 		- Flamethrower
 		- Invincibility (Short)
