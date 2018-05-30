@@ -137,8 +137,14 @@ void ABase_GunPawn::Tick(float deltaTime) {
 
 void ABase_GunPawn::HandleMovement(float deltaTime) {
 	if(IsValid(InputComponent)) {
-		PitchBase->AddRelativeRotation(FRotator(0, 0, InputComponent->GetAxisValue(LookUpBinding)), false, nullptr, ETeleportType::TeleportPhysics);
-		YawBase->AddRelativeRotation(FRotator(0, InputComponent->GetAxisValue(LookRightBinding), 0), false, nullptr, ETeleportType::TeleportPhysics);
+		float upValue = InputComponent->GetAxisValue(LookUpBinding);
+		float rightValue = InputComponent->GetAxisValue(LookRightBinding);
+		if(IsValid(GetController()) && GetController()->GetClass()->IsChildOf(AAI_Controller::StaticClass())) {
+			upValue = LookUpValue;
+			rightValue = LookRightValue;
+		}
+		PitchBase->AddRelativeRotation(FRotator(0, 0, upValue), false, nullptr, ETeleportType::TeleportPhysics);
+		YawBase->AddRelativeRotation(FRotator(0, rightValue, 0), false, nullptr, ETeleportType::TeleportPhysics);
 	}
 }
 void ABase_GunPawn::HandlePrimaryFire(float deltaTime) {

@@ -17,14 +17,19 @@ UCLASS()
 class VEHICLECOMBATGAMECPP_API AAI_Controller : public AAIController {
 	GENERATED_BODY()
 
+	private:
+		void HandleDrivePawn(ABase_DrivePawn* pawn, AActor* target);
+		void HandleGunPawn(ABase_GunPawn* pawn, AActor* target);
+		ABase_Item* GetClosestItem(ABase_DrivePawn* pawn);
 
 	protected:
-		virtual void HandleDrivePawn(ABase_DrivePawn* pawn);
-		virtual void HandleGunPawn(ABase_GunPawn* pawn);
+		virtual AActor* GetDriveTarget(ABase_DrivePawn* pawn);
+		virtual AActor* GetGunTarget(ABase_GunPawn* pawn);
 
 	public:
 		void Tick(float delta) override;
-		class AActor *FindClosestActorOfType(UClass* actorClass);
+		class AActor *FindClosestActorOfType(UClass* actorClass, bool withLineOfSight);
+		FRotator GetBaseRotator(FVector location);
 		void SetSteering(AActor* actor);
 		void SetSteering(FVector location);
 		void SetThrottle(AActor *actor);

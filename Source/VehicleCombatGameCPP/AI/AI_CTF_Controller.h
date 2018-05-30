@@ -25,8 +25,8 @@ class VEHICLECOMBATGAMECPP_API AAI_CTF_Controller : public AAI_Controller
 		void SetThrottle(ABase_DrivePawn* myPawn, ACTF_Flag* flag);
 
 	protected:
-		virtual void HandleDrivePawn(ABase_DrivePawn* pawn) override;
-		virtual void HandleGunPawn(ABase_GunPawn* pawn) override;
+		virtual AActor* GetDriveTarget(ABase_DrivePawn* pawn);
+		virtual AActor* GetGunTarget(ABase_GunPawn* pawn);
 	
 	
 };

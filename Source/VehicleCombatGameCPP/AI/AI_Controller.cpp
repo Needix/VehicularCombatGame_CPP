@@ -16,25 +16,51 @@ void AAI_Controller::Tick(float delta) {
 	}
 
 	if(pawn->GetClass()->IsChildOf(ABase_DrivePawn::StaticClass())) {
-		HandleDrivePawn(CastChecked<ABase_DrivePawn>(pawn));
+		ABase_DrivePawn* drivePawn = CastChecked<ABase_DrivePawn>(pawn);
+		AActor* target = GetDriveTarget(drivePawn);
+
+		ABase_Item* item = GetClosestItem(drivePawn);
+		if(drivePawn->GetDistanceTo(item) < drivePawn->GetDistanceTo(target) / 10) {
+			target = item;
+		}
+
+		HandleDrivePawn(drivePawn, target);
 	} else if(pawn->GetClass()->IsChildOf(ABase_GunPawn::StaticClass())) {
-		HandleGunPawn(CastChecked<ABase_GunPawn>(pawn));
+		ABase_GunPawn* gunPawn = CastChecked<ABase_GunPawn>(pawn);
+		AActor* target = GetGunTarget(gunPawn);
+		HandleGunPawn(gunPawn, target);
 	}
 }
 
-void AAI_Controller::HandleDrivePawn(ABase_DrivePawn* pawn) {
-	AActor* actor = FindClosestActorOfType(ABase_DrivePawn::StaticClass());
-	if(IsValid(actor)) {
-		SetThrottle(actor);
-		SetSteering(actor);
+void AAI_Controller::HandleDrivePawn(ABase_DrivePawn* pawn, AActor* target) {
+	if(IsValid(pawn) && IsValid(target)) {
+		SetThrottle(target);
+		SetSteering(target);
 	}
 }
-void AAI_Controller::HandleGunPawn(ABase_GunPawn* pawn) {
-	AActor* actor = FindClosestActorOfType(ABase_DrivePawn::StaticClass());
-	if(IsValid(actor)) {
+void AAI_Controller::HandleGunPawn(ABase_GunPawn* pawn, AActor* target) {
+	if(IsValid(pawn) && IsValid(target)) {
 		pawn->OnPrimaryFirePressed();
-		// TODO:
+		FRotator baseRotator = GetBaseRotator(target->GetActorLocation());
+		pawn->SetLookUpValue(UKismetMathLibrary::MapRangeClamped(baseRotator.Pitch, -50, 50, -1, 1));
+		pawn->SetLookRightValue(UKismetMathLibrary::MapRangeClamped(baseRotator.Yaw, -50, 50, -1, 1));
 	}
+}
+
+AActor* AAI_Controller::GetDriveTarget(ABase_DrivePawn* pawn) {
+	return FindClosestActorOfType(ABase_DrivePawn::StaticClass(), false);
+}
+
+AActor* AAI_Controller::GetGunTarget(ABase_GunPawn* pawn) {
+	return FindClosestActorOfType(ABase_DrivePawn::StaticClass(), true);
+}
+
+ABase_Item* AAI_Controller::GetClosestItem(ABase_DrivePawn* pawn) {
+	AActor* closestItem = FindClosestActorOfType(ABase_Item::StaticClass(), false);
+	if(IsValid(closestItem)) {
+		return CastChecked<ABase_Item>(closestItem);
+	}
+	return NULL;
 }
 
 void AAI_Controller::SetThrottle(AActor *closestPlayer) {
@@ -54,18 +80,19 @@ void AAI_Controller::SetSteering(AActor *player) {
 void AAI_Controller::SetSteering(FVector location) {
 	if(GetPawn()->GetClass()->IsChildOf(ABase_DrivePawn::StaticClass())) {
 		ABase_DrivePawn* pawn = CastChecked<ABase_DrivePawn>(GetPawn());
-
-		FRotator rotator = UKismetMathLibrary::FindLookAtRotation(GetPawn()->GetActorLocation(), location);
-		FRotator myRotator = GetPawn()->GetActorRotation();
-		FRotator baseRotator = UKismetMathLibrary::NormalizedDeltaRotator(rotator, myRotator);
-		float yaw = baseRotator.Yaw;
-		float steering = UKismetMathLibrary::MapRangeClamped(yaw, -100, 100, -1, 1);
-		pawn->SetSteering(steering);
+		FRotator baseRotator = GetBaseRotator(location);
+		pawn->SetSteering(UKismetMathLibrary::MapRangeClamped(baseRotator.Yaw, -100, 100, -1, 1));
 	}
 }
 
+FRotator AAI_Controller::GetBaseRotator(FVector location) {
+	FRotator rotator = UKismetMathLibrary::FindLookAtRotation(GetPawn()->GetActorLocation(), location);
+	FRotator myRotator = GetPawn()->GetActorRotation();
+	return UKismetMathLibrary::NormalizedDeltaRotator(rotator, myRotator);
+}
 
-AActor *AAI_Controller::FindClosestActorOfType(UClass* actorClass) {
+
+AActor *AAI_Controller::FindClosestActorOfType(UClass* actorClass, bool withLineOfSight) {
 	AActor *closest = NULL;
 	float nearestPlayerDistance = -1;
 
@@ -73,7 +100,21 @@ AActor *AAI_Controller::FindClosestActorOfType(UClass* actorClass) {
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), actorClass, actors);
 
 	for (AActor* actor : actors) {
+		if(!actor->GetRootComponent()->IsVisible()) {
+			continue;
+		}
 		float distance = GetPawn()->GetDistanceTo(actor);
+
+		if(withLineOfSight) {
+			FHitResult outHit;
+			TArray<AActor *> actorsToIgnore;
+			TArray<TEnumAsByte<EObjectTypeQuery>> objectTypes;
+			bool traceSuccess = UKismetSystemLibrary::LineTraceSingle(GetWorld(), GetPawn()->GetActorLocation(), actor->GetActorLocation(), ETraceTypeQuery::TraceTypeQuery_MAX, false, actorsToIgnore, EDrawDebugTrace::None, outHit, true);
+			if(!traceSuccess || outHit.Actor != actor) {
+				continue;
+			}
+		}
+
 		if (nearestPlayerDistance == -1 || distance < nearestPlayerDistance) {
 			nearestPlayerDistance = distance;
 			closest = actor;

@@ -49,6 +49,9 @@ class VEHICLECOMBATGAMECPP_API ABase_GunPawn : public APawn {
 	ABase_Item* Item;
 
 	class ABase_DrivePawn* DrivePawn;
+	
+	float LookUpValue = 0;
+	float LookRightValue = 0;
 
   private:
 	void SetupComponents();
@@ -93,5 +96,13 @@ class VEHICLECOMBATGAMECPP_API ABase_GunPawn : public APawn {
 
 	UMaterialInstanceDynamic* GetMaterial() {
 		return SkeletonMeshMaterialInstance;
+	}
+
+	void SetLookUpValue(float value) {
+		LookUpValue = value;
+	}
+
+	void SetLookRightValue(float value) {
+		LookRightValue = value;
 	}
 };

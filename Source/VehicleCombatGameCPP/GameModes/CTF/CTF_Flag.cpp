@@ -62,7 +62,7 @@ void ACTF_Flag::Tick(float DeltaTime) {
 void ACTF_Flag::BoxCollisionComponentOverlap(class AActor* myActor, class AActor* otherActor) {
 	UClass* otherActorClass = otherActor->GetClass();
 	if(otherActorClass->IsChildOf(ABase_DrivePawn::StaticClass())) { // Potential Player pick up
-		if(DrivePawn == myActor && ReattachTimer < 1) {
+		if(DrivePawn == otherActor || ReattachTimer < 1) {
 			return;
 		}
 
@@ -77,8 +77,7 @@ void ACTF_Flag::BoxCollisionComponentOverlap(class AActor* myActor, class AActor
 			return;
 		}
 		ATeam* team = CastChecked<ATeam>(otherActor);
-		ABase_DrivePawn* driver = CastChecked<ABase_DrivePawn>(GetOwner());
-		if(driver->GetTeam() == team) {
+		if(DrivePawn->GetTeam() == team) {
 			team->IncreasePoints(1);
 			Destroy();
 		}

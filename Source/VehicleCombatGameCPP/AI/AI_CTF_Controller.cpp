@@ -8,35 +8,20 @@
 
 #include "GameModes/CTF/CTF_Flag.h"
 
-void AAI_CTF_Controller::HandleDrivePawn(ABase_DrivePawn* pawn) {
+AActor* AAI_CTF_Controller::GetDriveTarget(ABase_DrivePawn* pawn) {
 	ACTF_Flag* flag = FindFlag();
 	if(flag == NULL) {
-		return;
+		return Super::GetDriveTarget(pawn);
 	}
 	
-	SetSteering(pawn, flag);
-	SetThrottle(pawn, flag);
-
-}
-void AAI_CTF_Controller::HandleGunPawn(ABase_GunPawn* pawn) {
-	
-}
-
-
-void AAI_CTF_Controller::SetThrottle(ABase_DrivePawn* myPawn, ACTF_Flag* flag) {
-	if(flag->GetDrivePawn() == myPawn) {
-		Super::SetThrottle(myPawn->GetTeam());
+	if(flag->GetDrivePawn() == pawn) {
+		return pawn->GetTeam();
 	} else {
-		Super::SetThrottle(flag);
+		return flag;
 	}
 }
-
-void AAI_CTF_Controller::SetSteering(ABase_DrivePawn* myPawn, ACTF_Flag* flag) {
-	if(flag->GetDrivePawn() == myPawn) {
-		Super::SetSteering(myPawn->GetTeam());
-	} else {
-		Super::SetSteering(flag);
-	}
+AActor* AAI_CTF_Controller::GetGunTarget(ABase_GunPawn* pawn) {
+	return Super::GetGunTarget(pawn);
 }
 
 ACTF_Flag* AAI_CTF_Controller::FindFlag() {
