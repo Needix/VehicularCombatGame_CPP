@@ -69,12 +69,10 @@ void ACTF_Flag::BoxCollisionComponentOverlap(class AActor* myActor, class AActor
 		DrivePawn = CastChecked<ABase_DrivePawn>(otherActor);
 		EAttachmentRule attachmentRule = EAttachmentRule::SnapToTarget;
 		FAttachmentTransformRules attachmentRules = FAttachmentTransformRules(attachmentRule, true);
-		UE_LOG(LogTemp, Warning, TEXT("Attaching %s to %s"), *this->GetName(), *DrivePawn->GetName());
 		ReattachTimer = 0;
 		boxCollision->bGenerateOverlapEvents = false;
 		this->AttachToActor(DrivePawn, attachmentRules);
 	} else if(otherActorClass->IsChildOf(ATeam::StaticClass())) { // Delivered to base?
-		if(true) return;
 		if(!IsValid(DrivePawn)) {
 			return;
 		}
