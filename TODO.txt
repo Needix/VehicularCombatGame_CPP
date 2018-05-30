@@ -26,7 +26,6 @@ Bugs:
 			
 	World Boundary:
 		- Reposition world boundaries
-		- Add world walls
 		
 Features:
 	Items:
