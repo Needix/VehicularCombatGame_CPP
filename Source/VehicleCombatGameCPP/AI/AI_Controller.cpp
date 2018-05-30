@@ -32,6 +32,7 @@ void AAI_Controller::HandleDrivePawn(ABase_DrivePawn* pawn) {
 void AAI_Controller::HandleGunPawn(ABase_GunPawn* pawn) {
 	AActor* actor = FindClosestActorOfType(ABase_DrivePawn::StaticClass());
 	if(IsValid(actor)) {
+		pawn->OnPrimaryFirePressed();
 		// TODO:
 	}
 }
