@@ -37,6 +37,7 @@ class VEHICLECOMBATGAMECPP_API ABase_GameMode : public AGameMode {
 	const static int CONST_DeathRespawnTime = 3;
 	const static int MaxTeams = 4;
 	const static int MaxCarsPerTeam = 2;
+	const static int CONST_DistanceBetweenTeamsBases = 20000;
 	TArray<ATeam *> Teams;
 
 	// Functions

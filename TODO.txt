@@ -5,10 +5,8 @@ Bugs:
 		- Spawn locations sometimes fail (fall though floor)
 	
 	Team:
-		- Dont spawn teams too close to each other
 	
 	AI:
-		- AI should pickup items in range
 	
 	Base_DrivePawn:
 		- 

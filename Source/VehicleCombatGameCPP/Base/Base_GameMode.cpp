@@ -96,15 +96,33 @@ void ABase_GameMode::FindLevelBoundaries() {
 void ABase_GameMode::CreateTeams() {
 	UE_LOG(LogTemp, Display, TEXT("Creating teams..."));
 	for (int i = 0; i < MaxTeams; i++) {
-		FVector location = GetRandomTerrainLocation();
-		location.Z = location.Z + 100;
+		while(true) {
+			FVector location = GetRandomTerrainLocation();
+			location.Z = location.Z + 100;
+			FTransform spawnTransform = FTransform(location);
 
-		FTransform spawnTransform = FTransform(location);
-		FActorSpawnParameters spawnParameters;
-		spawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-		ATeam *team = GetWorld()->SpawnActor<ATeam>(ATeam::StaticClass(), spawnTransform, spawnParameters);
-		team->Setup(FString(TEXT("Team ") + FString::FromInt(i + 1)), i, TeamColors[i]);
-		Teams.Add(team);
+			bool closeToOtherBase = false;
+			TArray<AActor *> actors;
+			UGameplayStatics::GetAllActorsOfClass(GetWorld(), ATeam::StaticClass(), actors);
+			for(AActor* actor : actors) {
+				FVector distanceVector = (actor->GetActorLocation() - location);
+				float distance = distanceVector.Size();
+				if(distance < CONST_DistanceBetweenTeamsBases) {
+					closeToOtherBase = true;
+					break;
+				}
+			}
+			if(closeToOtherBase) {
+				continue;
+			}
+
+			FActorSpawnParameters spawnParameters;
+			spawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+			ATeam *team = GetWorld()->SpawnActor<ATeam>(ATeam::StaticClass(), spawnTransform, spawnParameters);
+			team->Setup(FString(TEXT("Team ") + FString::FromInt(i + 1)), i, TeamColors[i]);
+			Teams.Add(team);
+			break;
+		}
 	}
 }
 void ABase_GameMode::AddPlayerToAnyTeam(APlayer_Controller *pc) {
