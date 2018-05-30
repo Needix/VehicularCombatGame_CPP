@@ -24,6 +24,8 @@
 #include "Player/Player_Controller.h"
 #include "Player/Player_DrivePawn.h"
 
+#define COLLISION_LANDSCAPE		ECC_GameTraceChannel2
+
 // Sets default values
 ATeam::ATeam() {
 	//SetReplicates(true);
@@ -188,8 +190,6 @@ void ATeam::AddPlayer(APlayer_Controller* controller) {
 	}
 }
 
-
-
 ABase_DrivePawn *ATeam::SpawnCar(AController *controller, UClass *driveClass) {
 	if(!IsValid(this) || !HasAuthority()) {
 		return NULL;
@@ -206,9 +206,7 @@ ABase_DrivePawn *ATeam::SpawnCar(AController *controller, UClass *driveClass) {
 		// Make line trace if we hit a landscape (prevent spawn over water for example)
 		FHitResult outHit;
 		TArray<AActor *> actorsToIgnore;
-		TArray<TEnumAsByte<EObjectTypeQuery>> objectTypes;
-		objectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldStatic));
-		bool traceSuccess = UKismetSystemLibrary::LineTraceSingleForObjects(GetWorld(), lineTraceStart, lineTraceEnd, objectTypes, false, actorsToIgnore, EDrawDebugTrace::None, outHit, true);
+		bool traceSuccess = UKismetSystemLibrary::LineTraceSingle(GetWorld(), lineTraceStart, lineTraceEnd, UEngineTypes::ConvertToTraceType(COLLISION_LANDSCAPE), false, actorsToIgnore, EDrawDebugTrace::None, outHit, true);
 
 		// Successfull?
 		if (traceSuccess && outHit.Actor->GetClass()->IsChildOf(ALandscape::StaticClass())) { // TODO: This and lineTrace is the same as in Base_GameMode.css in function CreateTeams. Mabye combine into one function/helper?

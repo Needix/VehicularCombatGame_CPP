@@ -27,6 +27,8 @@
 #include "Player/Player_DrivePawn.h"
 #include "Player/Player_Controller.h"
 
+#define COLLISION_LANDSCAPE		ECC_GameTraceChannel2
+
 ABase_GameMode::ABase_GameMode() {
 	DefaultPawnClass = NULL;
 	// HUDClass = AVehicleCombatGameCPPHud::StaticClass();
@@ -155,9 +157,7 @@ FVector ABase_GameMode::GetRandomTerrainLocation() {
 
 		FHitResult outHit;
 		TArray<AActor *> actorsToIgnore;
-		TArray<TEnumAsByte<EObjectTypeQuery>> objectTypes;
-		objectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldStatic));
-		bool traceSuccess = UKismetSystemLibrary::LineTraceSingleForObjects(GetWorld(), lineTraceStart, lineTraceEnd, objectTypes, false, actorsToIgnore, EDrawDebugTrace::None, outHit, true);
+		bool traceSuccess = UKismetSystemLibrary::LineTraceSingle(GetWorld(), lineTraceStart, lineTraceEnd, UEngineTypes::ConvertToTraceType(COLLISION_LANDSCAPE), false, actorsToIgnore, EDrawDebugTrace::None, outHit, true);
 
 		if (traceSuccess && outHit.Actor->GetClass()->IsChildOf(ALandscape::StaticClass())) {
 			return outHit.Location;
