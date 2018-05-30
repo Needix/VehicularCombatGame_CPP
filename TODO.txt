@@ -26,9 +26,7 @@ Bugs:
 		- Put the floor to the ground if it detaches in the air (e.g. car with flag gets destroyed in midair)
 		
 	UI:
-		- Healthbar not working sometimes:
-			- Random
-			- In gunner seat
+		- Healthbar not working sometimes
 			
 	World Boundary:
 		- Reposition world boundaries

@@ -82,6 +82,7 @@ class VEHICLECOMBATGAMECPP_API ABase_GunPawn : public APawn {
 		Item = item;
 	}
 
+	UFUNCTION(BlueprintCallable)
 	ABase_DrivePawn* GetDrivePawn() {
 		return DrivePawn;
 	}
