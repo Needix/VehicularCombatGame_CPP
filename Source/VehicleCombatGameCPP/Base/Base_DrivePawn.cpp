@@ -303,7 +303,6 @@ void ABase_DrivePawn::InitializeFlipCarTimeline() {
 	static ConstructorHelpers::FObjectFinder<UCurveFloat> Curve(TEXT("CurveFloat'/Game/VehicularCombatGame/Curves/Linear.Linear'"));
 
 	FlipCarTimeline = NewObject<UTimelineComponent>(this, FName("FlipCarTimeline"));
-	FlipCarTimeline->SetPropertySetObject(this);
 
 	FOnTimelineFloat callback;
 	FOnTimelineEventStatic onFinishedCallback;

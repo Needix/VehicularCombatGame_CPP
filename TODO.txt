@@ -1,6 +1,4 @@
 Bugs:
-	LogTimeline: SetPlaybackPosition: No float property 'None' in 'AI_DrivePawn_6'
-
 	GameMode:
 		- Spawn locations sometimes fail (fall though floor)
 	
