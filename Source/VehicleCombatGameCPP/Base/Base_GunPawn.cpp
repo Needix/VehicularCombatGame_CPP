@@ -148,7 +148,7 @@ void ABase_GunPawn::HandleMovement(float deltaTime) {
 	}
 }
 void ABase_GunPawn::HandlePrimaryFire(float deltaTime) {
-	if(IsPrimaryFiring && IsValid(Item)) {
+	if(IsPrimaryFiring && Item && IsValid(Item)) {
 		Item->Use();
 	}
 }

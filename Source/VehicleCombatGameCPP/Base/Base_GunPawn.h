@@ -46,6 +46,7 @@ class VEHICLECOMBATGAMECPP_API ABase_GunPawn : public APawn {
 
 	bool IsPrimaryFiring;
 
+	UPROPERTY()
 	ABase_Item* Item;
 
 	class ABase_DrivePawn* DrivePawn;
