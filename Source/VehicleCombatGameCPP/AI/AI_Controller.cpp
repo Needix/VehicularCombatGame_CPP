@@ -8,6 +8,7 @@
 
 #include "Base/Base_DrivePawn.h"
 #include "Base/Base_GunPawn.h"
+#include "GameModes/Team.h"
 
 void AAI_Controller::Tick(float delta) {
 	APawn* pawn = GetPawn();
@@ -42,21 +43,26 @@ void AAI_Controller::HandleGunPawn(ABase_GunPawn* pawn, AActor* target) {
 	if(IsValid(pawn) && IsValid(target)) {
 		pawn->OnPrimaryFirePressed();
 		FRotator baseRotator = GetBaseRotator(target->GetActorLocation());
-		pawn->SetLookUpValue(UKismetMathLibrary::MapRangeClamped(baseRotator.Pitch, -50, 50, -1, 1));
-		pawn->SetLookRightValue(UKismetMathLibrary::MapRangeClamped(baseRotator.Yaw, -50, 50, -1, 1));
+		pawn->SetLookUpValue(baseRotator.Pitch);
+		pawn->SetLookRightValue(baseRotator.Yaw);
 	}
 }
 
 AActor* AAI_Controller::GetDriveTarget(ABase_DrivePawn* pawn) {
-	return FindClosestActorOfType(ABase_DrivePawn::StaticClass(), false);
+	TArray<AActor*> actorsToIgnore;
+	actorsToIgnore.Append(pawn->GetTeam()->GetTeamPlayerAsDrivePawns());
+	return FindClosestActorOfType(ABase_DrivePawn::StaticClass(), false, actorsToIgnore);
 }
 
 AActor* AAI_Controller::GetGunTarget(ABase_GunPawn* pawn) {
-	return FindClosestActorOfType(ABase_DrivePawn::StaticClass(), true);
+	TArray<AActor*> actorsToIgnore;
+	actorsToIgnore.Append(pawn->GetDrivePawn()->GetTeam()->GetTeamPlayerAsDrivePawns());
+	return FindClosestActorOfType(ABase_DrivePawn::StaticClass(), true, actorsToIgnore);
 }
 
 ABase_Item* AAI_Controller::GetClosestItem(ABase_DrivePawn* pawn) {
-	AActor* closestItem = FindClosestActorOfType(ABase_Item::StaticClass(), false);
+	TArray<AActor*> actorsToIgnore;
+	AActor* closestItem = FindClosestActorOfType(ABase_Item::StaticClass(), false, actorsToIgnore);
 	if(IsValid(closestItem)) {
 		return CastChecked<ABase_Item>(closestItem);
 	}
@@ -92,7 +98,7 @@ FRotator AAI_Controller::GetBaseRotator(FVector location) {
 }
 
 
-AActor *AAI_Controller::FindClosestActorOfType(UClass* actorClass, bool withLineOfSight) {
+AActor *AAI_Controller::FindClosestActorOfType(UClass* actorClass, bool withLineOfSight, TArray<AActor*> actorsToIgnore) {
 	AActor *closest = NULL;
 	float nearestPlayerDistance = -1;
 
@@ -103,18 +109,32 @@ AActor *AAI_Controller::FindClosestActorOfType(UClass* actorClass, bool withLine
 		if(!actor->GetRootComponent()->IsVisible()) {
 			continue;
 		}
-		float distance = GetPawn()->GetDistanceTo(actor);
+
+		bool ignoreActorFound = false;
+		for(AActor* actor2 : actorsToIgnore) {
+			if(actor == actor2) {
+				ignoreActorFound = true;
+			}
+		}
+		if(ignoreActorFound) {
+			continue;
+		}
 
 		if(withLineOfSight) {
 			FHitResult outHit;
-			TArray<AActor *> actorsToIgnore;
-			TArray<TEnumAsByte<EObjectTypeQuery>> objectTypes;
-			bool traceSuccess = UKismetSystemLibrary::LineTraceSingle(GetWorld(), GetPawn()->GetActorLocation(), actor->GetActorLocation(), ETraceTypeQuery::TraceTypeQuery_MAX, false, actorsToIgnore, EDrawDebugTrace::None, outHit, true);
-			if(!traceSuccess || outHit.Actor != actor) {
+			TArray<AActor *> actorsToIgnoreForTrace;
+			FVector sourceLocation = GetPawn()->GetActorLocation();
+			FVector targetLocation = actor->GetActorLocation();
+			FVector source2TargetVector = targetLocation - sourceLocation;
+			source2TargetVector.Normalize();
+			FVector source = sourceLocation + source2TargetVector * 200;
+			bool traceSuccess = UKismetSystemLibrary::LineTraceSingle(GetWorld(), source, targetLocation, ETraceTypeQuery::TraceTypeQuery_MAX, false, actorsToIgnoreForTrace, EDrawDebugTrace::None, outHit, true, FLinearColor::Red, FLinearColor::Green, 1);
+			if(!traceSuccess || outHit.Actor.Get() != actor) {
 				continue;
 			}
 		}
-
+		
+		float distance = GetPawn()->GetDistanceTo(actor);
 		if (nearestPlayerDistance == -1 || distance < nearestPlayerDistance) {
 			nearestPlayerDistance = distance;
 			closest = actor;

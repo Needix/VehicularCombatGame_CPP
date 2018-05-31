@@ -81,4 +81,6 @@ class VEHICLECOMBATGAMECPP_API ATeam : public AActor {
 	int GetPoints() { return Points; }
 	UFUNCTION(BlueprintCallable, Category = Getter)
 	FVector GetColor() { return Color; }
+
+	TArray<ABase_DrivePawn*> GetTeamPlayerAsDrivePawns();
 };

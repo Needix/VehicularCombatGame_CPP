@@ -263,3 +263,13 @@ void ATeam::IncreasePoints(int amount) {
 	Points += amount;
 	UE_LOG(LogTemp, Warning, TEXT("%s scored %i points. Now at %i points!"), *Name, amount, Points);
 }
+
+TArray<ABase_DrivePawn*> ATeam::GetTeamPlayerAsDrivePawns() {
+	TArray<ABase_DrivePawn*> result;
+	for(AController* controller : TeamPlayer) {
+		if(IsValid(controller->GetPawn())) {
+			result.Add(CastChecked<ABase_DrivePawn>(controller->GetPawn()));
+		}
+	}
+	return result;
+}

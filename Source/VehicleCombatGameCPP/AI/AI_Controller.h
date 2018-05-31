@@ -28,7 +28,7 @@ class VEHICLECOMBATGAMECPP_API AAI_Controller : public AAIController {
 
 	public:
 		void Tick(float delta) override;
-		class AActor *FindClosestActorOfType(UClass* actorClass, bool withLineOfSight);
+		class AActor *FindClosestActorOfType(UClass* actorClass, bool withLineOfSight, TArray<AActor*> actorsToIgnore);
 		FRotator GetBaseRotator(FVector location);
 		void SetSteering(AActor* actor);
 		void SetSteering(FVector location);
