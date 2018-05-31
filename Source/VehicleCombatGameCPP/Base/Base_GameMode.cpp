@@ -57,7 +57,7 @@ void ABase_GameMode::BeginPlay() {
 	Widget_Gameplay = CreateWidget<UWidget_Gameplay>(playerController, singleton->wGameplayWidget);
 	if (IsValid(Widget_Gameplay)) {
 		Widget_Gameplay->SetOwningPlayer(playerController);
-		Widget_Gameplay->AddToViewport(5000);
+		Widget_Gameplay->AddToViewport();
 	}
 
 	// Spawn Item Spawner

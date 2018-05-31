@@ -22,7 +22,7 @@ void APlayer_Controller::ChangeMenuWidget(TSubclassOf<UUserWidget> newWidgetClas
 	if (newWidgetClass != nullptr) {
 		CurrentWidget = CreateWidget<UUserWidget>(GetWorld(), newWidgetClass);
 		if (CurrentWidget != nullptr) {
-			CurrentWidget->AddToViewport();
+			CurrentWidget->AddToViewport(100);
 		}
 	}
 }
