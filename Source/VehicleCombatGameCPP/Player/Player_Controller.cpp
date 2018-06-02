@@ -50,6 +50,8 @@ void APlayer_Controller::ChangeMenuWidget(TSubclassOf<UUserWidget> newWidgetClas
 		CurrentWidget = CreateWidget<UUserWidget>(GetWorld(), newWidgetClass);
 		if (CurrentWidget != nullptr) {
 			CurrentWidget->AddToViewport(100);
+			CurrentWidget->SetKeyboardFocus();
+			SetInputMode(FInputModeUIOnly());
 		}
 	}
 }
@@ -114,6 +116,5 @@ void APlayer_Controller::CameraTransitionTimelineFinishedCallback() {
 }
 
 void APlayer_Controller::OnPauseMenu() {
-	SetInputMode(FInputModeUIOnly());
 	ChangeMenuWidget(Singleton->PauseMenuWidgetClass);
 }
