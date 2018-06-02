@@ -8,10 +8,6 @@
 #include "UObject/ConstructorHelpers.h"
 #include "Components/AudioComponent.h"
 #include "Components/TextRenderComponent.h"
-#include "Components/TimelineComponent.h"
-#include "Kismet/GameplayStatics.h"
-#include "Kismet/KismetMathLibrary.h"
-#include "Curves/CurveFloat.h"
 
 // Needed for VR Headset
 #if HMD_MODULE_INCLUDED
@@ -33,21 +29,10 @@ APlayer_DrivePawn::APlayer_DrivePawn() {
 	HornSoundComponent->bAutoActivate = false;
 	HornSoundComponent->SetSound(SoundCue.Object);
 	HornSoundComponent->SetupAttachment(GetMesh());
-
-	Cameras.Add(FTransform(FRotator(0, 0, 0), FVector(0, 0, 0), FVector(1, 1, 1)));
-	Cameras.Add(FTransform(FRotator(10, 0, 0), FVector(-125, 0, 0), FVector(1, 1, 1)));
-	Cameras.Add(FTransform(FRotator(10, 0, 0), FVector(-200, 0, 0), FVector(1, 1, 1)));
-
-	SetupCameraTransitionTimeline();
 }
 
 void APlayer_DrivePawn::BeginPlay() {
 	Super::BeginPlay();
-
-	TArray<AActor *> singletons;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASingleton::StaticClass(), singletons);
-	check(singletons.Num() == 1);
-	Singleton = CastChecked<ASingleton>(singletons[0]);
 
 	bool bWantInCar = false;
 	// Enable in car view if HMD is attached
@@ -60,28 +45,7 @@ void APlayer_DrivePawn::BeginPlay() {
 void APlayer_DrivePawn::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 
-	if (IsValid(CameraTransitionTimeline)) {
-		CameraTransitionTimeline->TickComponent(DeltaTime, ELevelTick::LEVELTICK_TimeOnly, NULL);
-	}
-
 	UpdateHMDCamera();
-}
-
-void APlayer_DrivePawn::SetupCameraTransitionTimeline() {
-	static ConstructorHelpers::FObjectFinder<UCurveFloat> Curve(TEXT("/Game/VehicularCombatGame/Curves/Linear.Linear"));
-
-	CameraTransitionTimeline = NewObject<UTimelineComponent>(this, FName("TimelineAnimation"));
-
-	FOnTimelineFloat callback;
-	FOnTimelineEventStatic onFinishedCallback;
-
-	callback.BindUFunction(this, FName{TEXT("CameraTransitionTimelineCallback")});
-	CameraTransitionTimeline->AddInterpFloat(Curve.Object, callback);
-
-	onFinishedCallback.BindUFunction(this, FName{TEXT("CameraTransitionTimelineFinishedCallback")});
-	CameraTransitionTimeline->SetTimelineFinishedFunc(onFinishedCallback);
-
-	CameraTransitionTimeline->RegisterComponent();
 }
 
 void APlayer_DrivePawn::SetupPlayerInputComponent(class UInputComponent *PlayerInputComponent) {
@@ -99,15 +63,12 @@ void APlayer_DrivePawn::SetupPlayerInputComponent(class UInputComponent *PlayerI
 
 	PlayerInputComponent->BindAction("Handbrake", IE_Pressed, this, &APlayer_DrivePawn::OnHandbrakePressed);
 	PlayerInputComponent->BindAction("Handbrake", IE_Released, this, &APlayer_DrivePawn::OnHandbrakeReleased);
-	PlayerInputComponent->BindAction("SwitchCamera", IE_Pressed, this, &APlayer_DrivePawn::OnToggleCamera);
 
 	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &APlayer_DrivePawn::OnResetVR);
 	PlayerInputComponent->BindAction("Horn", IE_Pressed, this, &APlayer_DrivePawn::OnHorn);
 
 	PlayerInputComponent->BindAction("ConnectToServer", IE_Pressed, this, &APlayer_DrivePawn::OnJoinServer);
 	PlayerInputComponent->BindAction("HostServer", IE_Pressed, this, &APlayer_DrivePawn::OnHostServer);
-
-	PlayerInputComponent->BindAction("PauseMenu", IE_Pressed, this, &APlayer_DrivePawn::OnPauseMenu);
 }
 
 void APlayer_DrivePawn::OnSwitchRole() {
@@ -144,11 +105,7 @@ void APlayer_DrivePawn::OnJoinServer() {
 	gameInstance->Join(pc->NetPlayerIndex);
 }
 
-void APlayer_DrivePawn::OnPauseMenu() {
-	APlayer_Controller *playerController = CastChecked<APlayer_Controller>(this->GetController());
-	playerController->SetInputMode(FInputModeUIOnly());
-	playerController->ChangeMenuWidget(Singleton->PauseMenuWidgetClass);
-}
+
 
 void APlayer_DrivePawn::UpdateHMDCamera() {
 	bool bHMDActive = false;
@@ -195,32 +152,6 @@ void APlayer_DrivePawn::OnResetVR() {
 #endif // HMD_MODULE_INCLUDED
 }
 
-void APlayer_DrivePawn::OnToggleCamera() {
-	int newIndex = CurrentCamera + 1;
-
-	if (newIndex >= Cameras.Num()) {
-		newIndex = 0;
-	}
-
-	CurrentCamera = newIndex;
-
-	OldCameraTransform = GetCamera()->GetRelativeTransform();
-
-	if (IsValid(CameraTransitionTimeline)) {
-		CameraTransitionTimeline->PlayFromStart();
-	}
-}
-
 void APlayer_DrivePawn::OnHorn() {
 	HornSoundComponent->Play();
-}
-
-void APlayer_DrivePawn::CameraTransitionTimelineCallback(float val) {
-	FTransform transform = UKismetMathLibrary::TLerp(OldCameraTransform, Cameras[CurrentCamera], val);
-
-	GetCamera()->SetRelativeLocationAndRotation(transform.GetLocation(), transform.GetRotation());
-}
-
-void APlayer_DrivePawn::CameraTransitionTimelineFinishedCallback() {
-	EnableIncarView(CurrentCamera == 0);
 }

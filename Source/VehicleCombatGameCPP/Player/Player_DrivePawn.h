@@ -3,8 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/TimelineComponent.h"
-#include "AllLevel/Singleton.h"
 #include "Base/Base_DrivePawn.h"
 #include "Player_DrivePawn.generated.h"
 
@@ -18,18 +16,6 @@ class VEHICLECOMBATGAMECPP_API APlayer_DrivePawn : public ABase_DrivePawn {
 	UPROPERTY(Category = Display, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UAudioComponent *HornSoundComponent;
 
-	UPROPERTY()
-	TArray<FTransform> Cameras;
-
-	UPROPERTY()
-	UTimelineComponent *CameraTransitionTimeline;
-
-	UFUNCTION()
-	void CameraTransitionTimelineCallback(float val);
-
-	UFUNCTION()
-	void CameraTransitionTimelineFinishedCallback();
-
   public:
 	APlayer_DrivePawn();
 	// INPUTS
@@ -37,7 +23,6 @@ class VEHICLECOMBATGAMECPP_API APlayer_DrivePawn : public ABase_DrivePawn {
 	void MoveRight(float Val);
 	void OnHandbrakePressed();
 	void OnHandbrakeReleased();
-	void OnToggleCamera();
 	void OnResetVR();
 	void OnHorn();
 	void OnHostServer();
@@ -48,15 +33,9 @@ class VEHICLECOMBATGAMECPP_API APlayer_DrivePawn : public ABase_DrivePawn {
 	virtual void SetupPlayerInputComponent(UInputComponent *InputComponent) override;
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
-	void SetupCameraTransitionTimeline();
 	void UpdateHMDCamera();
+	void EnableIncarView(const bool bState);
 
 	static const FName LookUpBinding;
 	static const FName LookRightBinding;
-
-  private:
-	void EnableIncarView(const bool bState);
-	int CurrentCamera = 0;
-	FTransform OldCameraTransform;
-	ASingleton *Singleton;
 };

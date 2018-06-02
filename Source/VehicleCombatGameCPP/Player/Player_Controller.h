@@ -3,8 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/TimelineComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "Blueprint/UserWidget.h"
+#include "AllLevel/Singleton.h"
 #include "GameModes/Team.h"
 #include "Player_Controller.generated.h"
 
@@ -21,11 +23,39 @@ class VEHICLECOMBATGAMECPP_API APlayer_Controller : public APlayerController {
 		
 		UFUNCTION(BlueprintCallable, Category = "UMG Game")
 		void ChangeMenuWidget(TSubclassOf<UUserWidget> newWidgetClass);
-	
-	protected:
+
+		UFUNCTION()
+		void CameraTransitionTimelineCallback(float val);
+
+		UFUNCTION()
+		void CameraTransitionTimelineFinishedCallback();
+
+		protected:
 		UPROPERTY()
 		UUserWidget *CurrentWidget;
-	
-	public:
+
+		UPROPERTY()
+		TArray<FTransform> Cameras;
+
+		UPROPERTY()
+		UTimelineComponent *CameraTransitionTimeline;
+
+  private:
+		int CurrentCamera = 0;
+		FTransform OldCameraTransform;
+		ASingleton *Singleton;
+
+  private:
+		void SetupCameraTransitionTimeline();
+
+  public:
+		virtual void BeginPlay() override;
 		virtual void Tick(float Delta) override;
+		virtual void SetupInputComponent() override;
+
+  public:
+		APlayer_Controller();
+
+		void OnToggleCamera();
+		void OnPauseMenu();
 };
