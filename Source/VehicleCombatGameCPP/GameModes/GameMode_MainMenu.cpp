@@ -6,7 +6,7 @@
 #include "Player/Player_Controller.h"
 
 AGameMode_MainMenu::AGameMode_MainMenu() {
-	static ConstructorHelpers::FObjectFinder<USoundCue> backgroundMusicObject(TEXT("/Game/StarterContent/Audio/Starter_Music_Cue.Starter_Music_Cue"));
+	static ConstructorHelpers::FObjectFinder<USoundCue> backgroundMusicObject(TEXT("/Game/VehicularCombatGame/Sound/MainMenu_Cue.MainMenu_Cue"));
 	UGameplayStatics::PlaySound2D(GetWorld(), backgroundMusicObject.Object);
 
 	DefaultPawnClass = APawn::StaticClass();
