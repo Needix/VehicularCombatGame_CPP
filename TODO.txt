@@ -31,3 +31,7 @@ Features:
 		- Flamethrower
 		- Invincibility (Short)
 		- Rockets
+
+	Settings:
+		- Load settings on game start
+		- Implement UI for key mapping configuration
