@@ -112,14 +112,18 @@ void ABase_GunPawn::SetupComponents() {
 	cameraComponent->SetRelativeScale3D(FVector(12.5, 12.5, 2));
 	cameraComponent->SetupAttachment(Barrel);
 
-	barrelInsde = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BarrelInside"));
-	barrelInsde->SetStaticMesh(cylinder.Object);
-	barrelInsde->SetRelativeLocation(FVector(0, 0, -20));
-	barrelInsde->SetRelativeRotation(FRotator(0, 0, 0));
-	barrelInsde->SetRelativeScale3D(FVector(0.5, 0.5, 0.9));
-	barrelInsde->SetMaterial(0, SkeletonMeshMaterialInstance);
-	barrelInsde->SetupAttachment(Barrel);
-	barrelInsde->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	barrelInside = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("barrelInside"));
+	barrelInside->SetStaticMesh(cylinder.Object);
+	barrelInside->SetRelativeLocation(FVector(0, 0, -20));
+	barrelInside->SetRelativeRotation(FRotator(0, 0, 0));
+	barrelInside->SetRelativeScale3D(FVector(0.5, 0.5, 0.9));
+	barrelInside->SetMaterial(0, SkeletonMeshMaterialInstance);
+	barrelInside->SetupAttachment(Barrel);
+	barrelInside->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	BarrelEnd = CreateDefaultSubobject<USceneComponent>(TEXT("BarrelEnd"));
+	BarrelEnd->SetRelativeLocation(FVector(0, 0, -55));
+	BarrelEnd->SetupAttachment(barrelInside);
 }
 
 // Called when the game starts or when spawned
@@ -132,7 +136,7 @@ void ABase_GunPawn::Tick(float deltaTime) {
 	Super::Tick(deltaTime);
 
 	HandleMovement(deltaTime);
-	HandlePrimaryFire(deltaTime);
+	//HandlePrimaryFire(deltaTime);
 }
 
 void ABase_GunPawn::HandleMovement(float deltaTime) {
@@ -144,9 +148,14 @@ void ABase_GunPawn::HandleMovement(float deltaTime) {
 		YawBase->SetRelativeRotation(FRotator(0, LookRightValue, 0), false, nullptr, ETeleportType::TeleportPhysics);
 	}
 }
-void ABase_GunPawn::HandlePrimaryFire(float deltaTime) {
-	if(IsPrimaryFiring && Item && IsValid(Item)) {
-		Item->Use();
+void ABase_GunPawn::OnPrimaryFirePressed() {
+	if(Item && IsValid(Item)) {
+		Item->OnPrimaryFirePressed();
+	}
+}
+void ABase_GunPawn::OnPrimaryFireReleased() {
+	if(Item && IsValid(Item)) {
+		Item->OnPrimaryFireReleased();
 	}
 }
 
@@ -170,4 +179,10 @@ void ABase_GunPawn::OnSwitchRole() {
 
 void ABase_GunPawn::SetColor(FVector color) {
 	SkeletonMeshMaterialInstance->SetVectorParameterValue("DiffuseColor", FLinearColor(color.X, color.Y, color.Z, 0));
+}
+
+FTransform ABase_GunPawn::GetGunBarrelEndTransform() {
+	FVector location = BarrelEnd->GetComponentLocation();
+	FRotator rotation = BarrelEnd->GetComponentRotation();
+	return FTransform(rotation, location, FVector(1,1,1));
 }

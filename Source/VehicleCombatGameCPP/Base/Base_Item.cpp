@@ -78,10 +78,12 @@ void ABase_Item::SetupEvents() {
 	boxCollision->OnComponentBeginOverlap.AddUnique(componentOverlapDelegate);
 }
 
-void ABase_Item::Use() {
-	if(Ammo <= 0) {
-		Destroy();
-	}
+void ABase_Item::OnPrimaryFirePressed() {
+	IsPrimaryFiring = true;
+}
+
+void ABase_Item::OnPrimaryFireReleased() {
+	IsPrimaryFiring = false;
 }
 
 void ABase_Item::BoxCollisionComponentOverlap(class AActor* myActor, class AActor* otherActor) {
@@ -91,7 +93,7 @@ void ABase_Item::BoxCollisionComponentOverlap(class AActor* myActor, class AActo
 	if(otherActor->GetClass()->IsChildOf(ABase_DrivePawn::StaticClass())) {
 		ABase_DrivePawn* pawn = CastChecked<ABase_DrivePawn>(otherActor);
 		pawn->GetGunPawn()->SetItem(this);
-		this->SetOwner(pawn->GetGunPawn());
+		GunPawn = pawn->GetGunPawn();
 		RootComponent->SetVisibility(false, true);
 		PickedUp = true;
 	}

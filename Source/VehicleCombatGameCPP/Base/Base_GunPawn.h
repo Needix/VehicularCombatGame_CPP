@@ -18,28 +18,30 @@ class VEHICLECOMBATGAMECPP_API ABase_GunPawn : public APawn {
 	GENERATED_BODY()
 
   private:
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(Category = Components, VisibleDefaultsOnly)
 	UStaticMeshComponent* base;
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(Category = Components, VisibleDefaultsOnly)
 	UStaticMeshComponent* YawBase;
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(Category = Components, VisibleDefaultsOnly)
 	USceneComponent* sceneComponent1;
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(Category = Components, VisibleDefaultsOnly)
 	UStaticMeshComponent* cube1;
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(Category = Components, VisibleDefaultsOnly)
 	UStaticMeshComponent* cube2;
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(Category = Components, VisibleDefaultsOnly)
 	USceneComponent* PitchBase;
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(Category = Components, VisibleDefaultsOnly)
 	UStaticMeshComponent* barrelBase;
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(Category = Components, VisibleDefaultsOnly)
 	UCameraComponent* cameraComponent;
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(Category = Components, VisibleDefaultsOnly)
 	UStaticMeshComponent* Barrel;
-	UPROPERTY(VisibleAnywhere)
-	UStaticMeshComponent* barrelInsde;
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(Category = Components, VisibleDefaultsOnly)
+	UStaticMeshComponent* barrelInside;
+	UPROPERTY(Category = Components, VisibleDefaultsOnly)
 	UMaterialInstanceDynamic* SkeletonMeshMaterialInstance;
+	UPROPERTY(Category = Components, VisibleDefaultsOnly)
+	USceneComponent* BarrelEnd;
 
 	static const FName LookUpBinding;
 	static const FName LookRightBinding;
@@ -67,22 +69,21 @@ class VEHICLECOMBATGAMECPP_API ABase_GunPawn : public APawn {
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	void HandleMovement(float deltaTime);
-	void HandlePrimaryFire(float deltaTime);
 
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent *PlayerInputComponent) override;
-	void OnPrimaryFirePressed() {
-		IsPrimaryFiring = true;
-	}
-	void OnPrimaryFireReleased() {
-		IsPrimaryFiring = false;
-	}
 	void OnSwitchRole();
 
+	void OnPrimaryFirePressed();
+	void OnPrimaryFireReleased();
 
 	void SetColor(FVector color);
-
+	
+	UFUNCTION(BlueprintCallable)
+	ABase_Item* GetItem() {
+		return Item;
+	}
 	void SetItem(ABase_Item* item) {
 		Item = item;
 	}
@@ -102,8 +103,9 @@ class VEHICLECOMBATGAMECPP_API ABase_GunPawn : public APawn {
 	void SetLookUpValue(float value) {
 		LookUpValue = value;
 	}
-
 	void SetLookRightValue(float value) {
 		LookRightValue = value;
 	}
+
+	FTransform GetGunBarrelEndTransform();
 };

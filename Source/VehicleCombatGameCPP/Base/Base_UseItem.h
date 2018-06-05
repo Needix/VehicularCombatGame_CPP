@@ -17,8 +17,12 @@ class VEHICLECOMBATGAMECPP_API ABase_UseItem : public ABase_Item
 {
 	GENERATED_BODY()
 	
-	
-	
+	private:
+		bool WasUsed;
+
 	protected:
-		virtual void Use() override;
+		void Use();
+	
+	public:
+		virtual void Tick(float delta) override;
 };

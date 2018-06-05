@@ -197,7 +197,8 @@ class ABase_DrivePawn : public AWheeledVehicle {
 	void SetTeam(ATeam* team) {
 		Team = team;
 	}
-
+	
+	UFUNCTION(BlueprintCallable)
 	ABase_GunPawn* GetGunPawn() {
 		return GunPawn;
 	}

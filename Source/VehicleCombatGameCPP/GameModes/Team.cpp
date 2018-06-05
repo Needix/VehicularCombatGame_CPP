@@ -267,7 +267,7 @@ void ATeam::IncreasePoints(int amount) {
 TArray<ABase_DrivePawn*> ATeam::GetTeamPlayerAsDrivePawns() {
 	TArray<ABase_DrivePawn*> result;
 	for(AController* controller : TeamPlayer) {
-		if(IsValid(controller->GetPawn())) {
+		if(IsValid(controller) && IsValid(controller->GetPawn())) {
 			result.Add(CastChecked<ABase_DrivePawn>(controller->GetPawn()));
 		}
 	}

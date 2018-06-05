@@ -24,7 +24,6 @@ class VEHICLECOMBATGAMECPP_API ABase_TimerItem : public ABase_Item
 		float Timer = 0;
 
 	protected:
-		virtual void Use() override;
 		virtual void UseTick(float delta);
 	
 	public:

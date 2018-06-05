@@ -25,7 +25,7 @@ void AAI_Controller::Tick(float delta) {
 			target = item;
 		}
 
-		HandleDrivePawn(drivePawn, target);
+		//HandleDrivePawn(drivePawn, target);
 	} else if(pawn->GetClass()->IsChildOf(ABase_GunPawn::StaticClass())) {
 		ABase_GunPawn* gunPawn = CastChecked<ABase_GunPawn>(pawn);
 		AActor* target = GetGunTarget(gunPawn);
@@ -40,11 +40,13 @@ void AAI_Controller::HandleDrivePawn(ABase_DrivePawn* pawn, AActor* target) {
 	}
 }
 void AAI_Controller::HandleGunPawn(ABase_GunPawn* pawn, AActor* target) {
-	if(IsValid(pawn) && IsValid(target)) {
+	if(IsValid(pawn->GetItem()) && ((IsValid(pawn) && IsValid(target)) || !pawn->GetItem()->IsNeedingTarget())) { // Check for valid item. If valid item, either fire if we have a target in range, or the item does not need an target (e.g. health)
 		pawn->OnPrimaryFirePressed();
 		FRotator baseRotator = GetBaseRotator(target->GetActorLocation());
-		pawn->SetLookUpValue(baseRotator.Pitch);
+		pawn->SetLookUpValue(baseRotator.Pitch + 0.11);
 		pawn->SetLookRightValue(baseRotator.Yaw);
+	} else {
+		pawn->OnPrimaryFireReleased();
 	}
 }
 
@@ -124,7 +126,9 @@ AActor *AAI_Controller::FindClosestActorOfType(UClass* actorClass, bool withLine
 			FHitResult outHit;
 			TArray<AActor *> actorsToIgnoreForTrace;
 			FVector sourceLocation = GetPawn()->GetActorLocation();
+			sourceLocation.Z += 50;
 			FVector targetLocation = actor->GetActorLocation();
+			targetLocation.Z += 40;
 			FVector source2TargetVector = targetLocation - sourceLocation;
 			source2TargetVector.Normalize();
 			FVector source = sourceLocation + source2TargetVector * 200;

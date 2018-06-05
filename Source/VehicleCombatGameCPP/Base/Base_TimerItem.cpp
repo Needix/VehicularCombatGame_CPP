@@ -3,9 +3,6 @@
 #include "Base_TimerItem.h"
 #include "Engine/Texture2D.h"
 
-void ABase_TimerItem::Use() {
-	IsEnabled = true;
-}
 
 void ABase_TimerItem::Tick(float delta) {
 	if(!IsEnabled) {

@@ -10,6 +10,7 @@
 
 #include "Items/Health.h"
 #include "Items/HealthRegen.h"
+#include "Items/Minigun.h"
 
 // Sets default values
 ABase_ItemSpawner::ABase_ItemSpawner() {
@@ -18,6 +19,7 @@ ABase_ItemSpawner::ABase_ItemSpawner() {
 
 	ItemTypes.Add(AHealth::StaticClass());
 	ItemTypes.Add(AHealthRegen::StaticClass());
+	ItemTypes.Add(AMinigun::StaticClass());
 }
 
 // Called when the game starts or when spawned

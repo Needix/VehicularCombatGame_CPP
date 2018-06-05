@@ -22,13 +22,20 @@ private:
 	UBillboardComponent* IconBillboard;
 	UTexture2D* ItemIcon;
 
+	class ABase_GunPawn* GunPawn;
+
 	// Status
 	bool PickedUp;
 
 protected:
 	// Ammo
+	UPROPERTY(BlueprintReadOnly)
 	int Ammo;
 	int MaxAmmo;
+
+	bool NeedsTarget = true;
+
+	bool IsPrimaryFiring;
 
 private:
 	void SetupComponents();
@@ -48,11 +55,21 @@ protected:
 public:	
 	ABase_Item();
 
-	virtual void Use();
+	virtual void OnPrimaryFirePressed();
+	virtual void OnPrimaryFireReleased();
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	
+	bool IsNeedingTarget() {
+		return NeedsTarget;
+	}
 	
+	void SetGunPawn(class ABase_GunPawn* gunPawn) {
+		GunPawn = gunPawn;
+	}
+	ABase_GunPawn* GetGunPawn() {
+		return GunPawn;
+	}
 };

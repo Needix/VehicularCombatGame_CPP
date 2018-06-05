@@ -17,7 +17,6 @@ class VEHICLECOMBATGAMECPP_API AHealth : public ABase_UseItem
 	private:
 		float HealAmount = 40;
 	
-	
 	protected:
 		virtual void Use() override;
 

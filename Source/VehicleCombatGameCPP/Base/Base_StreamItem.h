@@ -16,7 +16,15 @@ UCLASS()
 class VEHICLECOMBATGAMECPP_API ABase_StreamItem : public ABase_Item
 {
 	GENERATED_BODY()
-	
-	
+
+	protected:
+		float AmmoPerMinute = 0;
+		float AmmoPerMinuteTimer = 0;
+
+	protected:
+		virtual void FirePrimary();
+
+	public:
+		virtual void Tick(float delta) override;
 	
 };

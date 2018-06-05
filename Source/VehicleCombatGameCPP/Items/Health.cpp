@@ -10,6 +10,8 @@
 AHealth::AHealth() {
 	ConstructorHelpers::FObjectFinder<UTexture2D> sprite(TEXT("Texture2D'/Game/VehicularCombatGame/Icons/SpriteRepair_128x128.SpriteRepair_128x128'"));
 	SetItemIcon(sprite.Object);
+
+	NeedsTarget = false;
 }
 
 void AHealth::Use() {
