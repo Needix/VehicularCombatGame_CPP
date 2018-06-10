@@ -25,7 +25,7 @@ void AAI_Controller::Tick(float delta) {
 			target = item;
 		}
 
-		//HandleDrivePawn(drivePawn, target);
+		HandleDrivePawn(drivePawn, target);
 	} else if(pawn->GetClass()->IsChildOf(ABase_GunPawn::StaticClass())) {
 		ABase_GunPawn* gunPawn = CastChecked<ABase_GunPawn>(pawn);
 		AActor* target = GetGunTarget(gunPawn);
