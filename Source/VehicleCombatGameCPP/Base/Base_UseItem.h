@@ -21,7 +21,7 @@ class VEHICLECOMBATGAMECPP_API ABase_UseItem : public ABase_Item
 		bool WasUsed;
 
 	protected:
-		void Use();
+		virtual void Use();
 	
 	public:
 		virtual void Tick(float delta) override;
